@@ -40,15 +40,15 @@ code.html
 
       // put your code here (you can delete this sample code)
 
-//      var tile = new Tile(new Rectangle(100, 100), 5, 4, 10, 10).center();
+      //      var tile = new Tile(new Rectangle(100, 100), 5, 4, 10, 10).center();
       //var tile = new Tile(new Circle(30, red), 5, 4, 10, 10).center();
 
-      var myRect = new Rectangle(100, 100,color=purple).center();
+      var myRect = new Rectangle(100, 100, color = purple).center();
 
       var circle = new Circle(10, green).centerReg(stage).drag();
       circle.on("pressmove", function(e) {
-//        var index = tile.hitTestGrid(tile.width, tile.height, 5, 4, circle.x, circle.y, 0, 0, 10, 10);
-        var index = myRect.hitTestGrid(myRect.width, myRect.height, 2, 2, circle.x, circle.y, 0, 0, 10, 10);
+        //        var index = tile.hitTestGrid(tile.width, tile.height, 5, 4, circle.x, circle.y, 0, 0, 10, 10);
+        var index = myRect.hitTestGrid(myRect.width, myRect.height, 1, 1, circle.x, circle.y, 0, 0, 10, 10);
         zog("I am logging: " + index);
       });
 
