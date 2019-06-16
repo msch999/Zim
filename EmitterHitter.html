@@ -106,13 +106,14 @@
 
           // check if id is in alreadyHitParticlesIds array
           if (alreadyHitParticlesIds.includes(curId)) { // alreaddy hit this one
+              p[cc].color = white;
 
           } else {
               alreadyHitParticlesIds.push(curId);  // not found, add it to array
               hitParticles++;
               p[cc].color = white;
           }
-          displayHitText.text = "hit particles: " + hitParticles + ", particle id: " + p[cc].id;
+          displayHitText.text = "hit particles: " + hitParticles + ", particle id: " + alreadyHitParticlesIds;
         } else {
           // nothing was hit
         }
