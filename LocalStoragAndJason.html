@@ -1,0 +1,361 @@
+
+	ZIM BITS - LOCAL STORAGE AND JSON VIEW BITS ZIM DOCS LEARN
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ZIM BITS - Local Storage and JSON in JavaScript HTML 5 Canvas and CreateJS - Tips, Techniques and Tutorials</title>
+
+<!-- Welcome to ZIM at https://zimjs.com - Code Creativity!              	        -->
+<!-- ZIM runs on the HTML Canvas powered by JavaScript and CreateJS https://createjs.com -->
+<!-- Founded by Inventor Dan Zen - http://danzen.com - Canadian New Media Award Winner 	-->
+<!-- ZIM is free to use. You can donate to help improve ZIM at http://zimjs.com/donate 	-->
+
+<script src="https://d309knd7es5f10.cloudfront.net/createjs_1.1_min.js"></script>
+<script src="https://d309knd7es5f10.cloudfront.net/zim_9.4.1.js"></script>
+<!-- use zimjs.com/distill for minified individual functions! -->
+
+<script src="https://zimjs.com/bits/footer9.js"></script><!-- you will not need this -->
+
+<script>
+
+// SCALING OPTIONS
+// scaling can have values as follows with full being the default
+// "fit"	sets canvas and stage to dimensions and scales to fit inside window size
+// "outside"	sets canvas and stage to dimensions and scales to fit outside window size
+// "full"	sets stage to window size with no scaling
+// "tagID"	add canvas to HTML tag of ID - set to dimensions if provided - no scaling
+
+var scaling = "fit"; // this will resize to fit inside the screen dimensions
+var width = 1000;
+var height = 800;
+var color = dark; // or any HTML color such as "violet" or "#333333"
+var outerColor = light;
+
+var frame = new Frame(scaling, width, height, color, outerColor);
+frame.on("ready", function() {
+	zog("ready from ZIM Frame");
+
+	var stage = frame.stage;
+	var stageW = frame.width;
+	var stageH = frame.height;
+
+
+	// ZIM BITS -  Local Storage (2016)
+
+	// We can store an object on the user's computer
+	// and put as many properties as we want in the object (string values)
+	// so often we store a JSON string
+	// the data can persist for the session (sessionStorage)
+	// or better, as long as we want (localStorage)
+
+	// In this ZIM Bit we make a game to place circles without touching anything
+	// we read from the localStorage to get the starting data if any
+	// we save the state in localStorage so the user can continue next time
+	// we also store the user's high score
+	// to share the high score with others, like a leader board, we would need a database
+
+	// THE GAME:
+	// we randomly get a diameter of the circle we are going to make between a range of minD and maxD
+	// we put that number at the cursor when rolled over the board
+	// the maxD gets smaller each time we make a circle (as the open space on the board reduces)
+	// we grow the circle with a tween and at the same time tween up the score by the diameter
+	// if the circle ends up hitting another circle or the edge of the board we reduce the alpha
+	// we also tween down the score twice the value of the diameter
+	// we cannot press another circle until the animations are done
+	// the next diameter animates in part way through the current circle growing
+	// the player presses the DONE button when they think they are finished
+	// at that point, the high score is checked
+
+
+	// STEPS
+	// 1. set up initial conditions for game
+	// 2. if there is localStorage data then set the data to the localStorage data
+	// 3. if there is not localStorage data then set the data to starting values
+	// 4. grab local variables for the lastMax and lastSize from the data
+	// 5. make a board that will mask the circles
+	// 6. make a container to hold the circles
+	// 7. loop through any circles that are already in the data from the localStorage
+	// 8. make the circle from the data [x,y,d,color,stroke,alpha]
+	// 9. add mousedown on board to amimate a circle in
+	// 10. if currently animating then don't animate in another circle
+	// 11. reduce the max diamter and keep it at least minDiff from the min diamter
+	// 12. store the lastMax on the data for later transfer to localStorage
+	// 13. hide the custom cursor and wait to animate it back in
+	// 14. animate the score property on the score object to the new score (plus reduce the alpha of the score)
+	// 15. make a new circle with a random colors from a list of colors
+	// 16. animate in the scale of the circle
+	// 17. check to see if hitting edges of board
+	// 18. check to see if hitting any other circle
+	// 19. if hitting animate the score property on the score object back down to minus the diameter points
+	// 20. when done animating, set the animateCheck to false, remove score Ticker and bring the score alpha back up
+	// 21. if hitting, reduce the alpha of the circle
+	// 22. record the Circle in the data
+	// 23. get the new diameter but also record the last for the delayed animation functions
+	// 24. store the diameter on the data as lastSize to save to localStorage later
+	// 25. update the cursor with the diameter
+	// 26. make the function to record the circle data and write JSON stringified data to the localStorage
+	// 27. add a ticker to set the score text to the scoreNum
+	// 28.  Make the custom cursor for the board
+	// 29. make the score and DONE button assets
+	// 30. make the score and DONE button assets
+	// 31. when DONE is pressed reset the data and send it to the localStorage and remove circles
+
+
+	////////////////////////////////////////////
+
+	// 1. set up initial conditions for game
+	var minD = 20; // smallest circle will be
+	var maxD = 200; // largest circle will be (reduces as circles are made)
+	var maxStartD = maxD; // starting circle max (for when resetting game)
+	var minDiff = 50; // the min range between minD and maxD
+	var reduction = 4; // how much the maxD goes down for each circle made
+	var diameter = rand(minD, maxD);
+
+	// localStorage.clear(); // uncomment to reset localStorage
+	var data; // will hold all the data for the scores, sizes, max and circles
+	if (localStorage && localStorage.game) {
+		// 2. if there is localStorage data then set the data to the localStorage data
+		// data format as follows:
+		// {score:20, high:30, lastSize:44, lastMax:55, circles:[[x,y,d,color,stroke,alpha], [x,y,d,color,stroke,alpha], etc.]}
+		data = JSON.parse(localStorage.game);
+	} else {
+		// 3. if there is not localStorage data then set the data to starting values
+		data = {score:0, high:0, lastSize:diameter, lastMax:maxStartD, circles:[]};
+	}
+
+	// 4. grab local variables for the lastMax and lastSize from the data
+	maxD = data.lastMax;
+	diameter = data.lastSize;
+
+	// 5. make a board that will mask the circles
+	var board = new Rectangle(700, 500, "#222")
+		.center()
+		.mov(-70);
+	board.cursor = "none";
+
+	// 6. make a container to hold the circles
+	var circles = new Container(board.width, board.height)
+		.loc(board) // loc will place registration point at location of any object with x and y points
+		.setMask(board); // do not chain setMask
+
+	// 7. loop through any circles that are already in the data from the localStorage
+	loop(data.circles, function(cData, i) {
+		// 8. make the circle from the data [x,y,d,color,stroke,alpha]
+		new Circle(cData[2]/2, cData[3], cData[4], 4)
+			.addTo(circles)
+			.loc(cData[0], cData[1])
+			.alp(cData[5]);
+	});
+
+	var lastDiameter;
+	var colors = [orange, blue, brown, yellow, pink, green];
+	var animateCheck = false;
+	// 9. add mousedown on board to amimate a circle in
+	board.on("mousedown", function() {
+		// 10. if currently animating then don't animate in another circle
+		if (animateCheck) return;
+		var hitting = false;
+		animateCheck = true;
+		// 11. reduce the max diamter and keep it at least minDiff from the min diamter
+		maxD -= reduction;
+		maxD = Math.max(maxD, minD + minDiff);
+		// 12. store the lastMax on the data for later transfer to localStorage
+		data.lastMax = maxD;
+		// 13. hide the custom cursor and wait to animate it back in
+		cursor.alpha = 0;
+		cursor.animate({alpha:1}, 700, null, null, null, 1000);
+		// 14. animate the score property on the score object to the new score (plus reduce the alpha of the score)
+		// note that this is not the text property, which does not quite seem to animate properly
+		// so we animate a property and then in a Ticker down below we set the text to the score.num
+		score.alpha = .5;
+		score.animate({num:score.num+diameter}, diameter*15);
+		// 15. make a new circle with a random colors from a list of colors
+		var circle = new Circle(diameter/2-2, shuffle(colors)[0], shuffle(colors)[1], 4)
+			.addTo(circles)
+			.loc(stage.mouseX-circles.x, stage.mouseY-circles.y)
+			.sca(0)
+			// 16. animate in the scale of the circle
+			.animate({scale:1}, diameter*15, null, function() {
+				var r = lastDiameter / 2;
+				// check if hitting the edges
+				// 17. check to see if hitting edges of board
+				if (circle.x-r<=0 || circle.x+r>=board.width || circle.y-r<=0 || circle.y+r>=board.height) {
+					hitting = true;
+				} else {
+					// 18. check to see if hitting any other circle
+					loop(circles, function(c, i, total) {
+						if (i+1==total) return; // do not check latest circle!
+						if (circle.width > c.width) { // use biggest circle as shape and smallest as points
+							if (c.hitTestCircle(circle, 16)) {
+								hitting = true;
+								return "hitting";
+							}
+						} else {
+							if (circle.hitTestCircle(c, 16)) {
+								hitting = true;
+								return "hitting";
+							}
+						}
+					});
+				}
+				if (hitting) {
+					// 19. if hitting animate the score property on the score object back down to minus the diameter points
+					// because we already animated up, we have to remove twice the diameter points
+					score.animate({num:score.num-lastDiameter*2}, 1000, null, function() {
+						// 20. when done animating, set the animateCheck to false, remove score Ticker, and bring the score alpha back up
+						animateCheck = false;
+						Ticker.remove(updateScore);
+						score.alpha = 1;
+					}, false, 500);
+					// 21. if hitting, reduce the alpha of the circle
+					circle.animate({alpha:.2}, 1000);
+					// 22. record the Circle in the data
+					recordCircle(score.num-lastDiameter*2, .2);
+				} else {
+					// 20. when done animating, set the animateCheck to false, remove score Ticker and bring the score alpha back up
+					animateCheck = false;
+					Ticker.remove(updateScore);
+					score.alpha = 1;
+					// 22. record the Circle in the data
+					recordCircle(score.num, 1);
+
+				}
+			});
+
+		// 23. get the new diameter but also record the last for the delayed animation functions
+		lastDiameter = diameter;
+		diameter = Math.round(rand(minD, maxD));
+		// 24. store the diameter on the data as lastSize to save to localStorage later
+		data.lastSize = diameter;
+		// 25. update the cursor with the diameter
+		cursor.text = diameter;
+
+		// 26. make the function to record the circle data and write JSON stringified data to the localStorage
+		function recordCircle(s, a) {
+			data.score = Math.round(s);
+			data.circles.push([Math.round(circle.x), Math.round(circle.y), circle.width, circle.color, circle.borderColor, a]);
+			// {score:20, high:30, lastSize:44, lastMax:55, circles:[[x,y,d,color,stroke,alpha], [x,y,r,color,stroke,alpha], etc.]}
+			localStorage.game = JSON.stringify(data);
+		}
+		// 27. add a ticker to set the score text to the scoreNum
+		Ticker.add(updateScore, stage);
+	});
+
+	function updateScore() {
+		score.text = Math.round(score.num);
+	}
+
+	// 28.  Make the custom cursor for the board
+	var moveEvent;
+	board.on("mouseover", function() {
+		stage.addChild(cursor);
+		moveEvent = stage.on("stagemousemove", function() {
+			cursor.x = stage.mouseX;
+			cursor.y = stage.mouseY;
+			stage.update();
+		});
+		board.on("mouseout", function() {
+			cursor.removeFrom(stage);
+			stage.update();
+			stage.off("stagemousemove", moveEvent);
+		}, null, true); // run once
+	});
+
+
+	////////////////////////  ASSETS  /////////////////
+
+	// 29. make the score and DONE button assets
+	var startXText = new Label(0, 20, null, "#777")
+		.pos(board.x + 10, board.y - 30);
+
+	var widthText = new Label(board.width, 20, null, "#777")
+		.pos(board.x + board.width - 40, board.y - 30);
+
+	var startYText = new Label(0, 20, null, "#777")
+		.pos(board.x - 26, board.y + 10);
+
+	var heightText = new Label(board.height, 20, null, "#777")
+		.pos(board.x - 45, board.y + board.height - 30);
+
+	var cursor = new Label({text:diameter, size:20, color:"white", align:"center", valign:"center"})
+		.centerReg({add:false});
+	cursor.mouseEnabled = false; // otherwise rollover on backing affected
+
+	// 30. make the score and DONE button assets
+	var panel = new Container(150, 500)
+		.center()
+		.pos(stageW - 150 - 40)
+	new Rectangle(panel.width, panel.height, "#444")
+		.addTo(panel);
+
+	var game = new Label({text:"DO NOT\nOVERLAP\nCIRCLES", size:25, color:green, align:"center"})
+		.center(panel)
+		.pos(null, panel.height - 450);
+
+	var scoreText = new Label({text:"SCORE", size:17, color:blue, align:"center"})
+		.center(panel)
+		.pos(null, panel.height - 330);
+	var score = new Label({
+		text:data.score, color:"white", align:"center", valign:"middle",
+		backing:new Rectangle(100, 50, "#222")
+	})
+		.center(panel)
+		.pos(null, scoreText.y + 35);
+	score.num = data.score;
+
+	var highText = new Label({text:"HIGH SCORE", size:17, color:blue, align:"center"})
+		.center(panel)
+		.pos(null, panel.height - 210);
+	var high = new Label({
+		text:data.high, color:"white", align:"center", valign:"middle",
+		backing:new Rectangle(100, 50, "#222")
+	})
+		.center(panel)
+		.pos(null, highText.y + 35);
+
+	var done = new Button({width:180, height:70, label:"DONE", corner:0})
+		.centerReg(panel)
+		.sca(score.backing.width/180)
+		.pos(null, panel.height - 70);
+
+	// 31. when DONE is pressed reset the data and send it to the localStorage and remove circles
+	done.on("click", function() {
+		data.circles = [];
+		maxD = data.lastMax = maxStartD;
+		if (score.num > data.high) {
+			score.num = Math.round(score.num);
+			high.text = score.num;
+			data.high = score.num;
+		}
+		data.score = 0;
+		localStorage.game = JSON.stringify(data);
+		score.num = 0;
+		circles.removeAllChildren();
+		score.text = 0;
+		stage.update();
+	});
+
+	var title = "LOCAL STORAGE AND JSON";
+	var label = new Label(title, 30, null, "#666")
+		.pos(60, 60);
+
+	makeFooter(stage, stageW, stageH); // ZIM BITS footer - you will not need this
+
+	stage.update();
+
+}); // end of ready
+
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimal-ui" />
+
+</head>
+
+<body>
+<!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+</html>
+
+© 2016 Dan Zen

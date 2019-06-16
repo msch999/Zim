@@ -1,0 +1,163 @@
+code.html
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ZIM Frame - Fit Template</title>
+
+<script src="https://d309knd7es5f10.cloudfront.net/createjs_1.1_min.js"></script>
+<script src="https://d309knd7es5f10.cloudfront.net/zim_10.4.1.js"></script>
+<!-- use zimjs.com/distill for minified individual functions! -->
+
+<script>
+var frame = //new Frame(scaling, width, height, color, outerColor);
+ new Frame(
+  "fit",
+  window.screen.availWidth,
+  window.screen.availHeight,
+  "#000",
+  "#555"
+);
+
+frame.on("ready", () => {
+  // ES6 Arrow Function - similar to function(){}
+  zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+
+  // often need below - so consider it part of the template
+  let stage = frame.stage;
+  let stageW = frame.width;
+  let stageH = frame.height;
+
+  // REFERENCES for ZIM at http://zimjs.com
+  // see http://zimjs.com/learn.html for video and code tutorials
+  // see http://zimjs.com/docs.html for documentation
+  // see https://www.youtube.com/watch?v=pUjHFptXspM for INTRO to ZIM
+  // see https://www.youtube.com/watch?v=v7OT0YrDWiY for INTRO to CODE
+
+  // CODE HERE
+  var emitter1Active = 1;
+  var emitter2Active = emitter1Active;
+  var pulseAnimation = 1;
+
+  var colorPal_Cenicienta3 = ["#034AA6","#022859","#034C8C","#049DBF","#04C4D9"];
+
+  function switchIt() {
+    pulseAnimation = !pulseAnimation;
+  }
+
+  function colorRangeAnimation(o) {
+    o.setColorRange("#FFFFFF","#000088");  // sets range colors
+    o.colorRange = 0.99;   // sets the ratio of the two colors
+    o.animate({props:{ scale:0.6, colorRange:0.01 }, time:700, from:true, loop:true, ease:"linear", rewind:true});
+  }
+
+  function radialGradiantAnimation(o) {
+    sink.colorCommand.radialGradient(["#FFFF00","#000033"], [0, .5], 0, -0, 20, 0, 0, 30);
+    sink.animate({props:{ scale:0.6 }, time:700, from:true, loop:true, ease:"linear", rewind:true});
+  }
+
+
+    // eg.2 use a sink to attract the particles
+  //var sink = new Circle(50, "#333333").centerReg(stage).alp(1);
+  var sink = new Circle(40, "#000033", lighter, 3).centerReg(stage).alp(1);
+
+  if (pulseAnimation)  {
+    radialGradiantAnimation(sink);
+  } else {
+    colorRangeAnimation(sink);
+  }
+
+  sink.drag({slide:true, removeTweens:true});
+  var rect = new Rectangle(400, 400, "blue");
+  if (sink.hitTestBounds(rect)) {
+      stage.removeChild(rect);
+      stage.update();
+      zog("I am hit!");
+   }
+
+    if (emitter1Active) {
+    // eg.1 make a bunch of spewing circles
+    var emitter = new Emitter({
+      obj: new Circle(2, yellow),
+      num: 10,
+      life: 3000,
+      shrink:false,
+      trace:false,
+      traceFadeTime:800,
+      width:stageW,
+		  height:stageH,
+      interval: 40,
+      gravity: 0,
+      sink: sink,
+      sinkForce: 1.7,
+      force: 3
+    }).centerReg(stage);
+  }
+
+
+  if (emitter2Active) {
+    // make one of three types of particles and randomize the colors
+    var particles = new Emitter({
+      obj: [
+        new Circle(20, null, [darker, lighter], 2),
+        new Rectangle(30, 30, null, [darker, lighter], 2),
+        new Triangle(40, 40, 40, null, [darker, lighter], 2)
+      ],
+      random: {
+        //color: [blue, green, pink, yellow, orange, red, white, '#FF0011'],
+        color: colorPal_Cenicienta3,
+        rotation: { min: -360, max: 360 },
+        //			scale: { min: 0.5, max: 2.3 }
+        scale: { min: 1.0, max: 2.5 }
+      },
+      interval: 50, // default
+      life: 6000,
+      shrink:false,
+      decayTime: 1000, // default
+      sink: sink,
+      sinkForce:10.7,
+      gravity: 0,
+      animation: {
+        obj: { rotation: ["360", "-360"], scale: 0.7 },
+        loop: false,
+        time: { min: 4000, max: 5000 },
+        ease: "linear",
+        from: false
+      },
+      force: { min: 2, max: 3 }, // 2.85
+      cache: mobile() // default
+    })
+      .centerReg(stage)
+      .sca(2);
+  }
+
+  //sink.top();  // similar to next line
+  sink.parent.setChildIndex(sink, sink.parent.numChildren-1);
+
+  // or animate to where the cursor is when clicking background
+	stage.on("stagemousedown", function(e) { // collect event object with mouse position info
+		sink
+			.top() // bring to top
+			.animate({x:e.stageX/stage.scaleX, y:e.stageY/stage.scaleY}, 500); //  animate pos to click pos, default ease is quadInOut
+	});
+
+ 	var tickerFunction = Ticker.add(function() {
+	  if (sink.hitTestBounds(sink)) {
+    }
+		//zog("i am hit");
+	}, stage);
+
+  stage.update(); // this is needed to show any changes
+}); // end of ready
+
+</script>
+
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+
+</head>
+
+<body>
+<!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+</html>

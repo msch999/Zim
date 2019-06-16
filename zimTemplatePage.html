@@ -1,0 +1,47 @@
+code.html
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ZIM Frame - Fit Template</title>
+
+<script src="https://d309knd7es5f10.cloudfront.net/createjs_1.1_min.js"></script>
+<script src="https://d309knd7es5f10.cloudfront.net/zim_10.4.1.js"></script>
+<!-- use zimjs.com/distill for minified individual functions! -->
+
+<script>
+var frame = //new Frame(scaling, width, height, color, outerColor);
+ new Frame(
+  "fit",
+  window.screen.availWidth,
+  window.screen.availHeight,
+  "#000",
+  "#555"
+);
+
+frame.on("ready", function() {
+    zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+
+    var stage = frame.stage;
+    var stageW = frame.width;
+    var stageH = frame.height;
+
+    // put your code here (you can delete this sample code)
+
+    stage.update(); // this is needed to show any changes
+
+}); // end of ready
+
+</script>
+
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+
+</head>
+
+<body>
+<!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+</html>
+
+
