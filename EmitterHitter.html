@@ -28,8 +28,9 @@
 
       // put your code here
       var colorPal_Cenicienta3 = ["#034AA6", "#022859", "#034C8C", "#049DBF", "#04C4D9"];
+      var colorPal_Gold = ["#a67c00", "#bf9b30", "#ffbf00", "#ffcf40", "#ffdc73"];
       var mostPopColours2019 = [
-//        "#7FFF00", // UFO Green
+        //        "#7FFF00", // UFO Green
         "#FF1493", // Plastic Pink
         "#8A2BE2", // Proton Purple
         "#000080", // Australia
@@ -40,16 +41,14 @@
         "#808000", // Taiwan
       ];
 
-      var colorPal_Gold = ["#a67c00", "#bf9b30","#ffbf00","#ffcf40","#ffdc73"];
-
       var hitParticles = 0;
 
       var backgroundCircleBelow = new Circle(stageH / 2 + 70, "#111111").centerReg(stage);
-      var backgroundCircleTop   = new Circle(stageH / 2 - 50, "#333333").centerReg(stage);
+      var backgroundCircleTop = new Circle(stageH / 2 - 50, "#333333").centerReg(stage);
 
       // a text label for displaying the number of hit particles
       var displayHitText = new Label({
-          text: "hit particles: " + hitParticles,
+          text: "hit particles: " + hitParticles + " Num of Particles: 0",
           size: 17,
           color: yellow,
           align: "left"
@@ -57,8 +56,10 @@
         .addTo(stage)
         .pos(50, 50);
 
-      // green small circle: is users interaction object, might serve as sink
-      var circle = new Circle(10, "#7FFF00").addTo(stage).pos(100, 100).drag();
+      // green small circle at a random pos: user's interaction object, might serve as sink
+      var startPosx = zim.rand(50, stageW - 50);
+      var startPosy = zim.rand(50, stageH - 50);
+      var circle = new Circle(10, "#7FFF00").addTo(stage).pos(startPosx, startPosy).drag();
 
       var theCenter = new Circle(10, orange).centerReg(stage);
 
@@ -71,19 +72,19 @@
           color: colorPal_Gold,
           rotation: {
             min: -360,
-            max: 0
+            max: 360
           },
           scale: {
-            min: 0.3,
+            min: 0.4,
             max: 1.0
           }
         },
-        interval: 200,
-        num: 1,
+        interval: 500,
+        num: 2,
         life: 8000,
         fade: false,
         shrink: false,
-        force: 0.71,
+        force: 0.31,
         gravity: 0,
         animation: {
           obj: {
@@ -98,10 +99,11 @@
           ease: "linear",
           from: false
         },
-        sink: null,
-        sinkForce: 0,
+        sink: circle,
+        sinkForce: 0.3,
         startPaused: false
       }).centerReg(stage);
+
 
       var tickerFunction = Ticker.add(function() {
         var p = particles.particles.children; // p is the array of individual Particles
@@ -121,34 +123,28 @@
 
           // check if id is in alreadyHitParticlesIds array
           if (alreadyHitParticlesIds.includes(curId)) { // alreaddy hit this one
-            p[cc].color = white;
-
+            p[cc].color = purple;
           } else {
             alreadyHitParticlesIds.push(curId); // not found, add it to array
             hitParticles++;
-            p[cc].color = white;
+            p[cc].color = purple;
           }
-          displayHitText.text = "hit particles: " + hitParticles + ", particle id: " + alreadyHitParticlesIds;
+          //displayHitText.text = "hit particles: " + hitParticles + ", particle id: |" + alreadyHitParticlesIds +  "| Num of Particles: " + particles.particles.children.length;
+          displayHitText.text = "hit particles: " + hitParticles + " total particles: " + particles.particles.children.length;
         } else {
           // nothing was hit
-        } //zog("i am hit");
+        }
       }, stage);
 
-      var alreadyHitParticlesIds = []; // store the id of the particle hit
-
-      // end of pressmove
+      var alreadyHitParticlesIds = []; // for storing the id of the particle hit
 
       stage.update(); // this is needed to show any changes
 
     }); // end of ready
   </script>
-
   <meta name="viewport" content="width=device-width, user-scalable=no" />
-
 </head>
-
 <body>
   <!-- canvas with id="myCanvas" is made by zim Frame -->
 </body>
-
 </html>
