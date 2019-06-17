@@ -84,11 +84,42 @@
         startPaused: false
       }).centerReg(stage);
 
+      var tickerFunction = Ticker.add(function() {
+        var p = particles.particles.children; // p is the array of individual Particles
+        var numElem = p.length;
+        var index = null; // for return value of hit test
+        var cc = 0;
+
+        for (cc = 0; cc < numElem; cc++) {
+          index = p[cc].hitTestGrid(p[cc].width, p[cc].height, 1, 1, circle.x, circle.y, 0, 0, 10, 10);
+          if (index == 0)
+            break;
+        }
+
+        if (index == 0) {
+          //  "I am hit";
+          var curId = p[cc].id;
+
+          // check if id is in alreadyHitParticlesIds array
+          if (alreadyHitParticlesIds.includes(curId)) { // alreaddy hit this one
+              p[cc].color = white;
+
+          } else {
+              alreadyHitParticlesIds.push(curId);  // not found, add it to array
+              hitParticles++;
+              p[cc].color = white;
+          }
+          displayHitText.text = "hit particles: " + hitParticles + ", particle id: " + alreadyHitParticlesIds;
+        } else {
+          // nothing was hit
+        }    		//zog("i am hit");
+    	}, stage);
 
       var alreadyHitParticlesIds = []; // store the id of the particle hit
 
       // the circles event pressmove function
       circle.on("pressmove", function(e) {
+/*
         var p = particles.particles.children; // p is the array of individual Particles
         var numElem = p.length;
         var index = null; // for return value of hit test
@@ -117,6 +148,7 @@
         } else {
           // nothing was hit
         }
+*/        
       });
       // end of pressmove
 
