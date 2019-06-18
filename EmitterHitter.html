@@ -56,6 +56,26 @@
         .addTo(stage)
         .pos(50, 50);
 
+        var countDownTimer = 10;
+        var iv = interval(1000, function(){
+          //zog("repeat after a second");
+          if (countDownTimer > 0)
+            countDownTimer--;
+        });
+
+
+        var button = new Button({label:"STOP", toggle:"START"}).addTo(stage).pos(50, 100);;
+        button.on("click", function(){
+          if (countDownTimer != 0) {
+              iv.pause(button.toggled);
+          } else {
+              countDownTimer = 10;
+          }
+          particles.pauseEmitter(button.toggled, freeze=true, immediate=true);
+        });
+
+
+
       // green small circle at a random pos: user's interaction object, might serve as sink
       var startPosx = zim.rand(50, stageW - 50);
       var startPosy = zim.rand(50, stageH - 50);
@@ -112,7 +132,9 @@
         var cc = 0;
 
         for (cc = 0; cc < numElem; cc++) {
-          index = p[cc].hitTestGrid(p[cc].width, p[cc].height, 1, 1, circle.x, circle.y, 0, 0, 10, 10);
+          // obj.hitTestGrid(width, height, cols, rows, x, y, offsetX, offsetY, spacingX, spacingY, local, type)
+          index = p[cc].hitTestGrid(60, 60, 1, 1, circle.x, circle.y, -30, -30 , 0, 0, false, "index");
+          //var rTmp = new Rectangle(10, 10,   null, [lighter], 2).addTo(stage).pos(circle.x-5, circle.y-5);
           if (index == 0)
             break;
         }
@@ -130,10 +152,12 @@
             p[cc].color = purple;
           }
           //displayHitText.text = "hit particles: " + hitParticles + ", particle id: |" + alreadyHitParticlesIds +  "| Num of Particles: " + particles.particles.children.length;
-          displayHitText.text = "hit particles: " + hitParticles + " total particles: " + particles.particles.children.length;
+          //displayHitText.text = "hit particles: " + hitParticles + " total particles: " + particles.particles.children.length;
+
         } else {
           // nothing was hit
         }
+        displayHitText.text = "countDownTimer: " + countDownTimer;
       }, stage);
 
       var alreadyHitParticlesIds = []; // for storing the id of the particle hit
