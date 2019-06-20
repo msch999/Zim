@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>ZIM BITS - Preload Images and Sound for JavaScript HTML 5 Canvas and CreateJS - Tips, Techniques and Tutorials</title>
+
+  <!-- Welcome to ZIM at https://zimjs.com - Code Creativity!              	        -->
+  <!-- ZIM runs on the HTML Canvas powered by JavaScript and CreateJS https://createjs.com -->
+  <!-- Founded by Inventor Dan Zen - http://danzen.com - Canadian New Media Award Winner 	-->
+  <!-- ZIM is free to use. You can donate to help improve ZIM at http://zimjs.com/donate 	-->
+
+  <script src="https://d309knd7es5f10.cloudfront.net/createjs_1.1_min.js"></script>
+  <script src="https://d309knd7es5f10.cloudfront.net/zim_9.4.1.js"></script>
+  <!-- use zimjs.com/distill for minified individual functions! -->
+
+  <script src="https://zimjs.com/bits/footer9.js"></script><!-- you will not need this -->
+
+  <script>
+    // SCALING OPTIONS
+    // scaling can have values as follows with full being the default
+    // "fit"	sets canvas and stage to dimensions and scales to fit inside window size
+    // "outside"	sets canvas and stage to dimensions and scales to fit outside window size
+    // "full"	sets stage to window size with no scaling
+    // "tagID"	add canvas to HTML tag of ID - set to dimensions if provided - no scaling
+
+    var scaling = "fit"; // this will resize to fit inside the screen dimensions
+    var width = 1000;
+    var height = 800;
+    var color = white;
+    var outerColor = dark;
+
+    // 1. prepare files and path to load with Frame
+    var assets = ["person_surfing.jpg", "C_D_E_D.001.mp3"];
+    var path = "assets/";
+    // 2. prepare a Waiter to show assets are loading - alternatively, can use a ProgressBar()
+    var waiter = new Waiter();
+
+    // 3. call Frame and set a ready event to start your app's main function
+    var frame = new Frame(scaling, width, height, color, outerColor, assets, path, waiter);
+    frame.on("ready", function() {
+      zog("ready from ZIM Frame");
+
+      var stage = frame.stage;
+      var stageW = frame.width;
+      var stageH = frame.height;
+
+      // ZIM BITS - Preload Images and Sound (2016)
+
+      // NOTE: the ZIM code just wraps the CreateJS PreloadJS code
+      // so all the work was done by the CreateJS Team
+      // the code can be found in the ZIM Templates
+      // templateload.html and templateloadprogress.html
+
+      // to show a graphic on the canvas we use createjs.Bitmap()
+      // but we should preload the graphic and monitor the loading process before we use it
+      // you may want to start your app once certain assets load instead of waiting for all
+      // but usually, it works out okay to wait for your assets and then start the app
+
+      // NOTE: In Chrome you will get security errors when running the html file locally
+      // when you bring in sound and images and then apply click events (Firefox does not care)
+      // it is fine in a server but here is how you can fix this for testing local files
+      // use command line flags: // https://www.chromium.org/for-testers/command-line-flags
+
+      // ON PC - quit any open Chrome browsers
+      // find your Chrome shortcut, right click to properties and in the target field
+      // add the following command line flag after the final quotes - for example:
+      // "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --allow-file-access-from-files
+
+      // ON MAC - quit any open Chrome browsers
+      // Quit any running instance of chrome.
+      // Launch /Applications/Utilities/Terminal.app
+      // At the command prompt enter:
+      // /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --allow-file-access-from-files
+
+
+      // below is the code from the ZIM Load template broken down into steps
+
+      // STEPS
+      // 1. prepare files and path to load with Frame
+      // 2. prepare a Waiter to show assets are loading - alternatively, can use a ProgressBar()
+      // 3. call Frame and set a ready event to start your app's main function
+      // 4. in your app function use frame.asset(file) to access an image
+      // 5. or use frame.asset(file).play() to play a sound
+
+      // 4. in your app function use frame.asset(file) to access an image
+      // frame references a createjs Bitmap object
+      // if you need a second copy, use var image2 = image.clone();
+      var image = frame.asset("person_surfing.jpg")
+        // here we will center the image, fade it in and make it click to a URL
+        .center(stage) // centers and adds to container (the stage in this case)
+        .animate({
+          obj: {
+            alpha: 0
+          },
+          time: 4000,
+          from: true
+        })
+        .cur()
+        .tap(function() {
+          zgo("https://zimjs.com", "_blank");
+        });
+
+      // 5. or use frame.asset(file).play() to play a sound
+      // if you want to adjust volume, etc. then assign this to a variable
+      // var sound = frame.asset("welcome.mp3").play({volume:2, loop:true});
+      // or after with property of the return object of play() - a CreateJS AbstractSoundInstance
+      // sound.volume = .5;
+      frame.asset("C_D_E_D.001.mp3").play();
+
+      //makeFooter(stage, stageW, stageH); // ZIM BITS footer - you will not need this
+
+      stage.update();
+
+
+    }); // end of ready
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimal-ui" />
+
+</head>
+
+<body>
+  <!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+
+</html>
