@@ -12,24 +12,21 @@
   <script>
   var assets = ["person_surfing.png", "C_D_E_D.001.mp3"];
   var path = "assets/";
-  // 2. prepare a Waiter to show assets are loading - alternatively, can use a ProgressBar()
-  var waiter = new Waiter();
 
-    var frame = //new Frame(scaling, width, height, color, outerColor);
+  var frame = //new Frame(scaling, width, height, color, outerColor);
       new Frame("fit",
         window.screen.availWidth,
         window.screen.availHeight,
-        "#000", "#555", assets, path, waiter);
+        "#000", "#555", assets, path);
 
     frame.on("ready", function() {
-      zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+//      zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
 
       var stage = frame.stage;
       var stageW = frame.width;
       var stageH = frame.height;
 
       // put your code here
-
       var colorPal_Cenicienta3 = ["#034AA6", "#022859", "#034C8C", "#049DBF", "#04C4D9"];
       var colorPal_Gold = ["#a67c00", "#bf9b30", "#ffbf00", "#ffcf40", "#ffdc73"];
       var mostPopColours2019 = [
@@ -50,19 +47,18 @@
       var backgroundCircleTop = new Circle(stageH / 2 - 50, "#333333").centerReg(stage);
 
       var image = frame.asset("person_surfing.png")
-        // here we will center the image, fade it in and make it click to a URL
-        .addTo(stage).pos(50, 200)
-              .animate({
-                obj: {
-                  alpha: 0
-                },
-                time: 4000,
-                from: true
-              })
-              .cur()
-              .tap(function() {
-                zgo("https://127.0.0.1", "_blank");
-              });
+        // add image, fade it in 
+        .addTo(stage)
+        .pos(50, 200)
+        .animate({
+            obj: {
+              alpha: 0
+            },
+            time: 2000,
+            from: true
+        })
+        .drag()
+        ;
 
       // a text label for displaying the number of hit particles
 
