@@ -112,10 +112,22 @@
 
       var theCenter = new Circle(10, orange).centerReg(stage);
 
+
+
       var particles = new zim.Emitter({
-        obj: [new Circle(20, null, [darker, lighter], 2),
-          new Rectangle(30, 30, null, [darker, lighter], 2),
-          new Triangle(40, 40, 40, null, [darker, lighter], 2)
+        // obj: [new Circle(20, null, [darker, lighter], 2),
+        //   new Rectangle(30, 30, null, [darker, lighter], 2),
+        //   new Triangle(40, 40, 40, null, [darker, lighter], 2)
+          obj: [
+            //new Circle(20, null, [darker, lighter], 2)
+            new Label({text: "😲",size: 40,align: "center"}),
+            new Label({text: "🏄",size: 80,align: "center"}),
+            new Label({text: "🚴",size: 80,align: "center"}),
+            new Label({text: "🛀",size: 80,align: "center"}),
+            new Label({text: "👯",size: 80,align: "center"}),
+            new Label({text: "👣",size: 80,align: "center"}),
+            new Label({text: "🏃",size: 80,align: "center"})
+
         ],
         random: {
           color: colorPal_Gold,
