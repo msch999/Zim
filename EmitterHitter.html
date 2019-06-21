@@ -89,30 +89,26 @@
 
 
 
-      // green small circle at a random pos: user's interaction object, might serve as sink
+      // random x y
       var startPosx = zim.rand(50, stageW - 50);
       var startPosy = zim.rand(50, stageH - 50);
+  //var circle = new Circle(10, "#7FFF00").addTo(stage).pos(startPosx, startPosy).drag();
 
-// a text label for displaying an emoji
-var displayEmoji = new Label({
-    text: "🐄",
-    size: 100,
-    align: "center"
-  })
-  .addTo(stage)
-  .pos(startPosx, startPosy)
-  .animate({
-      obj: {
-        alpha: 0
-      },
-      time: 2000,
-      from: true
-  })
-  .drag();
-
-
-
-      var circle = new Circle(10, "#7FFF00").addTo(stage).pos(startPosx, startPosy).drag();
+      var circle = new Label({
+          text: "🐄",
+          size: 100,
+          align: "center"
+        })
+        .addTo(stage)
+        .pos(startPosx, startPosy)
+        .animate({
+            obj: {
+              alpha: 0
+            },
+            time: 2000,
+            from: true
+        })
+        .drag();
 
       var theCenter = new Circle(10, orange).centerReg(stage);
 
@@ -166,17 +162,11 @@ var displayEmoji = new Label({
         var cc = 0;
 
         for (cc = 0; cc < numElem; cc++) {
-          wasHit = circle.hitTestBounds(other = p[cc]);
-
-          if (wasHit)
+          wasHit = circle.hitTestBounds(other = p[cc], margin = -10);
+          if (wasHit) {
             index = 0;
-
-          //index = p[cc].hitTestGrid(circle.width + rectScaler, circle.height + rectScaler, 1, 1, circle.x, circle.y, circle.x-((circle.width + rectScaler)/2), circle.y-((circle.height + rectScaler)/2), 0, 0, false, "index");
-          // Rectangle(width, height, color, borderColor, borderWidth, corner, dashed, strokeObj, style, group, inherit)
-          //var rTmp = new Rectangle(circle.width + rectScaler, circle.height + rectScaler,   null, [lighter], 2).addTo(stage).pos(circle.x-((circle.width+ rectScaler)/2), circle.y-((circle.height+rectScaler)/2));
-          //var rTmp = new Rectangle(60, 60,   null, [lighter], 2).addTo(stage).pos(circle.x-30, circle.y-30);
-          if (index == 0)
             break;
+          }
         }
 
         if (index == 0) {
