@@ -46,22 +46,7 @@
       var backgroundCircleBelow = new Circle(stageH / 2 + 70, "#111111").centerReg(stage);
       var backgroundCircleTop = new Circle(stageH / 2 - 50, "#333333").centerReg(stage);
 
-      var image = frame.asset("person_surfing.png")
-        // add image, fade it in 
-        .addTo(stage)
-        .pos(50, 200)
-        .animate({
-            obj: {
-              alpha: 0
-            },
-            time: 2000,
-            from: true
-        })
-        .drag()
-        ;
-
       // a text label for displaying the number of hit particles
-
       var displayHitText = new Label({
           text: "hit particles: " + hitParticles + " Num of Particles: 0",
           size: 17,
@@ -107,6 +92,26 @@
       // green small circle at a random pos: user's interaction object, might serve as sink
       var startPosx = zim.rand(50, stageW - 50);
       var startPosy = zim.rand(50, stageH - 50);
+
+// a text label for displaying an emoji
+var displayEmoji = new Label({
+    text: "🐄",
+    size: 100,
+    align: "center"
+  })
+  .addTo(stage)
+  .pos(startPosx, startPosy)
+  .animate({
+      obj: {
+        alpha: 0
+      },
+      time: 2000,
+      from: true
+  })
+  .drag();
+
+
+
       var circle = new Circle(10, "#7FFF00").addTo(stage).pos(startPosx, startPosy).drag();
 
       var theCenter = new Circle(10, orange).centerReg(stage);
@@ -157,12 +162,19 @@
         var p = particles.particles.children; // p is the array of individual Particles
         var numElem = p.length;
         var index = null; // for return value of hit test
+        var wasHit = false;
         var cc = 0;
 
         for (cc = 0; cc < numElem; cc++) {
-          // obj.hitTestGrid(width, height, cols, rows, x, y, offsetX, offsetY, spacingX, spacingY, local, type)
-          index = p[cc].hitTestGrid(60, 60, 1, 1, circle.x, circle.y, -30, -30, 0, 0, false, "index");
-          //var rTmp = new Rectangle(10, 10,   null, [lighter], 2).addTo(stage).pos(circle.x-5, circle.y-5);
+          wasHit = circle.hitTestBounds(other = p[cc]);
+
+          if (wasHit)
+            index = 0;
+
+          //index = p[cc].hitTestGrid(circle.width + rectScaler, circle.height + rectScaler, 1, 1, circle.x, circle.y, circle.x-((circle.width + rectScaler)/2), circle.y-((circle.height + rectScaler)/2), 0, 0, false, "index");
+          // Rectangle(width, height, color, borderColor, borderWidth, corner, dashed, strokeObj, style, group, inherit)
+          //var rTmp = new Rectangle(circle.width + rectScaler, circle.height + rectScaler,   null, [lighter], 2).addTo(stage).pos(circle.x-((circle.width+ rectScaler)/2), circle.y-((circle.height+rectScaler)/2));
+          //var rTmp = new Rectangle(60, 60,   null, [lighter], 2).addTo(stage).pos(circle.x-30, circle.y-30);
           if (index == 0)
             break;
         }
@@ -189,6 +201,7 @@
       }, stage);
 
       var alreadyHitParticlesIds = []; // for storing the id of the particle hit
+      //var grid = new zim.Grid({percent:false}).addTo();
 
       stage.update(); // this is needed to show any changes
 
