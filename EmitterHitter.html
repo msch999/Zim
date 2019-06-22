@@ -10,17 +10,17 @@
   <!-- use zimjs.com/distill for minified individual functions! -->
 
   <script>
-  var assets = ["person_surfing.png", "C_D_E_D.001.mp3"];
-  var path = "assets/";
+    var assets = ["C_D_E_D.001.mp3"];
+    var path = "assets/";
 
-  var frame = //new Frame(scaling, width, height, color, outerColor);
+    var frame = //new Frame(scaling, width, height, color, outerColor);
       new Frame("fit",
         window.screen.availWidth,
         window.screen.availHeight,
         "#000", "#555", assets, path);
 
     frame.on("ready", function() {
-//      zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+      //      zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
 
       var stage = frame.stage;
       var stageW = frame.width;
@@ -73,6 +73,26 @@
       });
 
 
+      // random x y
+      var startPosx = zim.rand(50, stageW - 50);
+      var startPosy = zim.rand(50, stageH - 50);
+      //var circle = new Circle(10, "#7FFF00").addTo(stage).pos(startPosx, startPosy).drag();
+      var circle = new Label({
+          text: "🐄",
+          size: 40,
+          align: "center"
+        })
+        .addTo(stage)
+        .pos(startPosx, startPosy)
+        .animate({
+          obj: {
+            alpha: 0
+          },
+          time: 2000,
+          from: true
+        })
+        .drag();
+
       var button = new Button({
         label: "STOP",
         toggle: "START"
@@ -83,32 +103,15 @@
         } else {
           countDownTimer = 10;
         }
-          frame.asset("C_D_E_D.001.mp3").play();
-          particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
+        var sound = frame.asset("C_D_E_D.001.mp3").play({
+          interrupt: "any",
+          volume: 0.2,
+          loop: 0,
+          pan: 0
+        });
+        particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
       });
 
-
-
-      // random x y
-      var startPosx = zim.rand(50, stageW - 50);
-      var startPosy = zim.rand(50, stageH - 50);
-  //var circle = new Circle(10, "#7FFF00").addTo(stage).pos(startPosx, startPosy).drag();
-
-      var circle = new Label({
-          text: "🐄",
-          size: 100,
-          align: "center"
-        })
-        .addTo(stage)
-        .pos(startPosx, startPosy)
-        .animate({
-            obj: {
-              alpha: 0
-            },
-            time: 2000,
-            from: true
-        })
-        .drag();
 
       var theCenter = new Circle(10, orange).centerReg(stage);
 
@@ -118,19 +121,47 @@
         // obj: [new Circle(20, null, [darker, lighter], 2),
         //   new Rectangle(30, 30, null, [darker, lighter], 2),
         //   new Triangle(40, 40, 40, null, [darker, lighter], 2)
-          obj: [
-            //new Circle(20, null, [darker, lighter], 2)
-            new Label({text: "😲",size: 40,align: "center"}),
-            new Label({text: "🏄",size: 80,align: "center"}),
-            new Label({text: "🚴",size: 80,align: "center"}),
-            new Label({text: "🛀",size: 80,align: "center"}),
-            new Label({text: "👯",size: 80,align: "center"}),
-            new Label({text: "👣",size: 80,align: "center"}),
-            new Label({text: "🏃",size: 80,align: "center"})
+        obj: [
+          //new Circle(20, null, [darker, lighter], 2)
+          new Label({
+            text: "😲",
+            size: 20,
+            align: "center"
+          }),
+          new Label({
+            text: "🏄",
+            size: 40,
+            align: "center"
+          }),
+          new Label({
+            text: "🚴",
+            size: 40,
+            align: "center"
+          }),
+          new Label({
+            text: "🛀",
+            size: 40,
+            align: "center"
+          }),
+          new Label({
+            text: "👯",
+            size: 40,
+            align: "center"
+          }),
+          new Label({
+            text: "👣",
+            size: 40,
+            align: "center"
+          }),
+          new Label({
+            text: "🏃",
+            size: 40,
+            align: "center"
+          })
 
         ],
         random: {
-          color: colorPal_Gold,
+          //          color: colorPal_Gold,
           rotation: {
             min: -360,
             max: 360
@@ -141,7 +172,7 @@
           }
         },
         interval: 500,
-        num: 2,
+        num: 1,
         life: 8000,
         fade: false,
         shrink: false,
@@ -183,15 +214,28 @@
 
         if (index == 0) {
           //  "I am hit";
+          circle.animate({
+            props: {
+              scale: 2.0
+            },
+            time: 250,
+            ease: "linear",
+            loop: 0,
+            rewind: true,
+            from: false
+          });
+
           var curId = p[cc].id;
 
           // check if id is in alreadyHitParticlesIds array
           if (alreadyHitParticlesIds.includes(curId)) { // alreaddy hit this one
-            p[cc].color = purple;
+            //p[cc].color = purple;
           } else {
             alreadyHitParticlesIds.push(curId); // not found, add it to array
             hitParticles++;
-            p[cc].color = purple;
+            //p[cc].color = purple;
+
+            index = -1;
           }
           //displayHitText.text = "hit particles: " + hitParticles + ", particle id: |" + alreadyHitParticlesIds +  "| Num of Particles: " + particles.particles.children.length;
           //displayHitText.text = "hit particles: " + hitParticles + " total particles: " + particles.particles.children.length;
