@@ -22,6 +22,7 @@
 
     var circle; // attracts the particles and is draggable
     var particles; // the Emitter
+    var displayHitText; //quick hack
 
     // assets to be loaded
     var assets = ["C_D_E_D.001.mp3"];
@@ -48,15 +49,15 @@
       var theCenter = new Circle(10, orange).centerReg(stage);
 
 
-      // text label displaying messages
-      var displayHitText = new Label({
-          text: " ",
-          size: 17,
-          color: yellow,
-          align: "left"
-        })
-        .addTo(stage)
-        .pos(50, 50);
+      // // text label displaying messages
+      // var displayHitText = new Label({
+      //     text: " ",
+      //     size: 17,
+      //     color: yellow,
+      //     align: "left"
+      //   })
+      //   .addTo(stage)
+      //   .pos(50, 50);
 
       var countDownTimer = maxTimeInLevel;
       var countingTime = true;
@@ -78,24 +79,24 @@
       });
 
       function setupButton() {
-        var button = new Button({
-          label: "STOP",
-          toggle: "START"
-        }).addTo(stage).pos(50, 100);;
-        button.on("click", function() {
-          if (countDownTimer != 0) {
-            iv.pause(button.toggled);
-          } else {
-            //countDownTimer = 10;
-          }
-          var sound = frame.asset("C_D_E_D.001.mp3").play({
-            interrupt: "any",
-            volume: 0.2,
-            loop: 0,
-            pan: 0
-          });
-          //particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
-        });
+        // var button = new Button({
+        //   label: "STOP",
+        //   toggle: "START"
+        // }).addTo(stage).pos(50, 100);;
+        // button.on("click", function() {
+        //   if (countDownTimer != 0) {
+        //     iv.pause(button.toggled);
+        //   } else {
+        //     //countDownTimer = 10;
+        //   }
+        //   var sound = frame.asset("C_D_E_D.001.mp3").play({
+        //     interrupt: "any",
+        //     volume: 0.2,
+        //     loop: 0,
+        //     pan: 0
+        //   });
+        //   //particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
+        // });
       } // end of setupButton
 
       function setupPlayerToken() {
@@ -233,32 +234,47 @@
         		width:400,
         		height:300,
             titleBar:series("data page 1", "data page 2"),
-        		close:false,
-        		displayClose:false,
-        		draggable:true,
-        		bar:"Pane"
+//        		close:false,
+//        		displayClose:false,
+        		draggable:true
+//        		bar:"Pane"
         	});
 
           // content for panel 1
-          var dataTab1 = new Container(panel.width, panel.height).addTo(panel);
-          dataTab1.center(panel);
+          var dataTab1 = new Container(panel.width, panel.height).center(panel);
 
-          var stepperPartNum = new Stepper({continuous:false, stepperType:"number", min:1, max:9})
+          // var partNum = 1;
+          var stepperPartNum = new Stepper(
+            {continuous:false, stepperType:"number", min:1, max:9})
             .pos(15, 50, false, false, dataTab1).sca(.25);
           stepperPartNum.currentValue = partNum;
           stepperPartNum.on("change", function() {
             partNum = stepperPartNum.selectedIndex;
             stage.update();
           });
-          // new Label({
-          //     text: "partNum",
-          //     size: 17,
-          //     color: black,
-          //     align: "left"
-          //   }).addTo(dataTab1);
+          new Label({
+              text: "partNum",
+              size: 17,
+              color: black,
+              align: "left"
+            }).addTo(dataTab1).pos(125, 53);
 
-          // var partNum = 1;
           // var partForce = 0.31;
+          var stepperPartForce = new Stepper(
+            {continuous:false, stepperType:"number", min:1, max:9})
+            .pos(15, 150, false, false, dataTab1).sca(.25);
+          stepperPartForce.currentValue = partForce;
+          stepperPartForce.on("change", function() {
+            partForce = stepperPartForce.selectedIndex;
+            stage.update();
+          });
+          new Label({
+              text: "partForce",
+              size: 17,
+              color: black,
+              align: "left"
+            }).addTo(dataTab1).pos(125, 153);
+
           // var partSinkForce = 0.3;
           // var partInterval = 500;
           // var partLife = 8000;
@@ -267,7 +283,49 @@
           // var curLevel = 0;
 
 
-//        pane.show(); // pressing anywhere will close pane (see parameters for options)
+          // content for panel 2
+          var dataTab2 = new Container(panel.width, panel.height);  // don't .center(panel) yet
+          // text label displaying messages
+          displayHitText = new Label({
+              text: " ",
+              size: 17,
+              color: black,
+              align: "left"
+            })
+            .addTo(dataTab2)
+            .pos(50, 50);
+
+            var button = new Button({
+              label: "STOP",
+              toggle: "START"
+            }).addTo(dataTab2).pos(50, 100);
+
+            button.on("click", function() {
+              if (countDownTimer != 0) {
+                iv.pause(button.toggled);
+              } else {
+                //countDownTimer = 10;
+              }
+              var sound = frame.asset("C_D_E_D.001.mp3").play({
+                interrupt: "any",
+                volume: 0.2,
+                loop: 0,
+                pan: 0
+              });
+              //particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
+            });
+
+          // event to change content as panels change
+          panel.on("change", function () {
+             if (dataTab2.parent) {
+                dataTab2.removeFrom();
+                dataTab1.center(panel);
+             } else {
+                dataTab1.removeFrom();
+                dataTab2.center(panel);
+             }
+          });
+
           panel.addTo().pos(50,50);
       } // end of setUpUi()
 
