@@ -10,6 +10,20 @@
   <!-- use zimjs.com/distill for minified individual functions! -->
 
   <script>
+    // particle parameters
+    var partNum = 1;
+    var partForce = 0.31;
+    var partSinkForce = 0.3;
+    var partInterval = 500;
+    var partLife = 8000;
+
+    var circle; // attracts the particles and is draggable
+    var particles; // the Emitter
+    // level parameters
+    var maxTimeInLevel = 10;
+    var curLevel = 0;
+
+    // assets to be loaded
     var assets = ["C_D_E_D.001.mp3"];
     var path = "assets/";
 
@@ -27,28 +41,16 @@
       var stageH = frame.height;
 
       // put your code here
-      var colorPal_Cenicienta3 = ["#034AA6", "#022859", "#034C8C", "#049DBF", "#04C4D9"];
-      var colorPal_Gold = ["#a67c00", "#bf9b30", "#ffbf00", "#ffcf40", "#ffdc73"];
-      var mostPopColours2019 = [
-        //        "#7FFF00", // UFO Green
-        "#FF1493", // Plastic Pink
-        "#8A2BE2", // Proton Purple
-        "#000080", // Australia
-        "#006400", // Brazil
-        "#00CED1", // Germany
-        "#FFF0F5", // Japan
-        "#2E8B57", // Korea
-        "#808000", // Taiwan
-      ];
 
-      var hitParticles = 0;
 
       var backgroundCircleBelow = new Circle(stageH / 2 + 70, "#111111").centerReg(stage);
       var backgroundCircleTop = new Circle(stageH / 2 - 50, "#333333").centerReg(stage);
+      var theCenter = new Circle(10, orange).centerReg(stage);
 
-      // a text label for displaying the number of hit particles
+
+      // text label displaying messages
       var displayHitText = new Label({
-          text: "hit particles: " + hitParticles + " Num of Particles: 0",
+          text: " ",
           size: 17,
           color: yellow,
           align: "left"
@@ -56,145 +58,132 @@
         .addTo(stage)
         .pos(50, 50);
 
-      var countDownTimer = 10;
+      var countDownTimer = maxTimeInLevel;
+      var countingTime = true;
+
+      // repeat after a second = 1000 ms
       var iv = interval(1000, function() {
-        //zog("repeat after a second");
-        if (countDownTimer > 0)
-          countDownTimer--;
-        else {
-          // 5. or use frame.asset(file).play() to play a sound
-          // if you want to adjust volume, etc. then assign this to a variable
-          // var sound = frame.asset("welcome.mp3").play({volume:2, loop:true});
-          // or after with property of the return object of play() - a CreateJS AbstractSoundInstance
-          // sound.volume = .5;
-
-          countDownTimer = 10;
+        if (countingTime == true) {
+          if (countDownTimer > 0)
+            countDownTimer--;
+          else {
+            // timer is 0; remove emitter, setup new one with next params
+            particles.particles.removeFrom(stage);
+            curLevel++;
+            countDownTimer = maxTimeInLevel;
+            partNum = partNum + 1;
+            setUpEmitter();
+          }
         }
       });
 
-
-      // random x y
-      var startPosx = zim.rand(50, stageW - 50);
-      var startPosy = zim.rand(50, stageH - 50);
-      //var circle = new Circle(10, "#7FFF00").addTo(stage).pos(startPosx, startPosy).drag();
-      var circle = new Label({
-          text: "🐄",
-          size: 40,
-          align: "center"
-        })
-        .addTo(stage)
-        .pos(startPosx, startPosy)
-        .animate({
-          obj: {
-            alpha: 0
-          },
-          time: 2000,
-          from: true
-        })
-        .drag();
-
-      var button = new Button({
-        label: "STOP",
-        toggle: "START"
-      }).addTo(stage).pos(50, 100);;
-      button.on("click", function() {
-        if (countDownTimer != 0) {
-          iv.pause(button.toggled);
-        } else {
-          countDownTimer = 10;
-        }
-        var sound = frame.asset("C_D_E_D.001.mp3").play({
-          interrupt: "any",
-          volume: 0.2,
-          loop: 0,
-          pan: 0
+      function setupButton() {
+        var button = new Button({
+          label: "STOP",
+          toggle: "START"
+        }).addTo(stage).pos(50, 100);;
+        button.on("click", function() {
+          if (countDownTimer != 0) {
+            iv.pause(button.toggled);
+          } else {
+            //countDownTimer = 10;
+          }
+          var sound = frame.asset("C_D_E_D.001.mp3").play({
+            interrupt: "any",
+            volume: 0.2,
+            loop: 0,
+            pan: 0
+          });
+          //particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
         });
-        particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
-      });
+      } // end of setupButton
 
-
-      var theCenter = new Circle(10, orange).centerReg(stage);
-
-
-
-      var particles = new zim.Emitter({
-        // obj: [new Circle(20, null, [darker, lighter], 2),
-        //   new Rectangle(30, 30, null, [darker, lighter], 2),
-        //   new Triangle(40, 40, 40, null, [darker, lighter], 2)
-        obj: [
-          //new Circle(20, null, [darker, lighter], 2)
-          new Label({
-            text: "😲",
-            size: 20,
-            align: "center"
-          }),
-          new Label({
-            text: "🏄",
-            size: 40,
-            align: "center"
-          }),
-          new Label({
-            text: "🚴",
-            size: 40,
-            align: "center"
-          }),
-          new Label({
-            text: "🛀",
-            size: 40,
-            align: "center"
-          }),
-          new Label({
-            text: "👯",
-            size: 40,
-            align: "center"
-          }),
-          new Label({
-            text: "👣",
-            size: 40,
-            align: "center"
-          }),
-          new Label({
-            text: "🏃",
+      function setupPlayerToken() {
+        // random x y
+        var startPosx = zim.rand(50, stageW - 50);
+        var startPosy = zim.rand(50, stageH - 50);
+        //var circle = new Circle(10, "#7FFF00").addTo(stage).pos(startPosx, startPosy).drag();
+        circle = new Label({
+            text: "🐄",
             size: 40,
             align: "center"
           })
+          .addTo(stage)
+          .pos(startPosx, startPosy)
+          .animate({
+            obj: {
+              alpha: 0
+            },
+            time: 2000,
+            from: true
+          })
+          .drag();
+      } // end of setupPlayerToken
 
-        ],
-        random: {
-          //          color: colorPal_Gold,
-          rotation: {
-            min: -360,
-            max: 360
+      var emojis = [
+        new Label({text: "😲",size: 20,align: "center"}),
+        new Label({text: "🏄",size: 40, align: "center"}),
+        new Label({text: "🚴",size: 40,align: "center"}),
+        new Label({text: "🛀",size: 40,align: "center"}),
+        new Label({text: "👯",size: 40,align: "center"}),
+        new Label({text: "👣",size: 30,align: "center"}),
+        new Label({text: "⭐",size: 40,align: "center"}),
+//        new Label({text: "🥶",size: 40,align: "center"})
+        new Label({text: "\u{1F4A9}",size: 40,align: "center"}),
+        new Label({text: "👨‍🚀",size: 40,align: "center"}),
+        new Label({text: "🛶",size: 40,align: "center"}),
+        new Label({text: "🌳",size: 40,align: "center"})
+
+
+      ];
+
+      function setUpEmitter() {
+        particles = new zim.Emitter({
+          // obj: [new Circle(20, null, [darker, lighter], 2),
+          //   new Rectangle(30, 30, null, [darker, lighter], 2),
+          //   new Triangle(40, 40, 40, null, [darker, lighter], 2)
+          obj: [emojis[6]],
+          random: {
+            //          color: colorPal_Gold,
+            rotation: {
+              min: -360,
+              max: 360
+            },
+            scale: {
+              min: 0.4,
+              max: 1.0
+            }
           },
-          scale: {
-            min: 0.4,
-            max: 1.0
-          }
-        },
-        interval: 500,
-        num: 1,
-        life: 8000,
-        fade: false,
-        shrink: false,
-        force: 0.31,
-        gravity: 0,
-        animation: {
-          obj: {
-            rotation: ["360", "-360"],
-            scale: 0.7
+          interval: partInterval,
+          num: partNum,
+          life: partLife,
+          fade: false,
+          shrink: false,
+          force: partForce,
+          gravity: 0,
+          animation: {
+            obj: {
+              rotation: ["360", "-360"]
+              //, scale: 0.7
+            },
+            loop: true,
+            time: {
+              min: 4000,
+              max: 5000
+            },
+            ease: "linear",
+            from: false
           },
-          loop: true,
-          time: {
-            min: 4000,
-            max: 5000
-          },
-          ease: "linear",
-          from: false
-        },
-        sink: circle,
-        sinkForce: 0.3,
-        startPaused: false
-      }).centerReg(stage);
+          sink: circle,
+          sinkForce: partSinkForce,
+          startPaused: false
+        }).centerReg(stage);
+      } // end of setUpEmitter
+
+
+      setupPlayerToken();
+      setupButton();
+      setUpEmitter();
 
 
       var tickerFunction = Ticker.add(function() {
@@ -213,7 +202,12 @@
         }
 
         if (index == 0) {
-          //  "I am hit";
+          //  circle is hit, stop the countdown
+          countingTime = false;
+
+          particles.pauseEmitter(true, freeze = true, immediate = true);
+
+          // pulse the player token
           circle.animate({
             props: {
               scale: 2.0
@@ -224,30 +218,11 @@
             rewind: true,
             from: false
           });
-
-          var curId = p[cc].id;
-
-          // check if id is in alreadyHitParticlesIds array
-          if (alreadyHitParticlesIds.includes(curId)) { // alreaddy hit this one
-            //p[cc].color = purple;
-          } else {
-            alreadyHitParticlesIds.push(curId); // not found, add it to array
-            hitParticles++;
-            //p[cc].color = purple;
-
-            index = -1;
-          }
-          //displayHitText.text = "hit particles: " + hitParticles + ", particle id: |" + alreadyHitParticlesIds +  "| Num of Particles: " + particles.particles.children.length;
-          //displayHitText.text = "hit particles: " + hitParticles + " total particles: " + particles.particles.children.length;
-
         } else {
           // nothing was hit
         }
-        displayHitText.text = "countDownTimer: " + countDownTimer;
+        displayHitText.text = "Current Level: " + curLevel + "  Time: " + countDownTimer;
       }, stage);
-
-      var alreadyHitParticlesIds = []; // for storing the id of the particle hit
-      //var grid = new zim.Grid({percent:false}).addTo();
 
       stage.update(); // this is needed to show any changes
 
