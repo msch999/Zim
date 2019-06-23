@@ -16,12 +16,12 @@
     var partSinkForce = 0.3;
     var partInterval = 500;
     var partLife = 8000;
+    // level parameters
+    var maxTimeInLevel = 15;
+    var curLevel = 0;
 
     var circle; // attracts the particles and is draggable
     var particles; // the Emitter
-    // level parameters
-    var maxTimeInLevel = 10;
-    var curLevel = 0;
 
     // assets to be loaded
     var assets = ["C_D_E_D.001.mp3"];
@@ -106,7 +106,8 @@
         circle = new Label({
             text: "🐄",
             size: 40,
-            align: "center"
+            align: "center",
+            reg: true  // register point --> center point of label
           })
           .addTo(stage)
           .pos(startPosx, startPosy)
@@ -121,18 +122,62 @@
       } // end of setupPlayerToken
 
       var emojis = [
-        new Label({text: "😲",size: 20,align: "center"}),
-        new Label({text: "🏄",size: 40, align: "center"}),
-        new Label({text: "🚴",size: 40,align: "center"}),
-        new Label({text: "🛀",size: 40,align: "center"}),
-        new Label({text: "👯",size: 40,align: "center"}),
-        new Label({text: "👣",size: 30,align: "center"}),
-        new Label({text: "⭐",size: 40,align: "center"}),
-//        new Label({text: "🥶",size: 40,align: "center"})
-        new Label({text: "\u{1F4A9}",size: 40,align: "center"}),
-        new Label({text: "👨‍🚀",size: 40,align: "center"}),
-        new Label({text: "🛶",size: 40,align: "center"}),
-        new Label({text: "🌳",size: 40,align: "center"})
+        new Label({
+          text: "😲",
+          size: 20,
+          align: "center"
+        }),
+        new Label({
+          text: "🏄",
+          size: 40,
+          align: "center"
+        }),
+        new Label({
+          text: "🚴",
+          size: 40,
+          align: "center"
+        }),
+        new Label({
+          text: "🛀",
+          size: 40,
+          align: "center"
+        }),
+        new Label({
+          text: "👯",
+          size: 40,
+          align: "center"
+        }),
+        new Label({
+          text: "👣",
+          size: 30,
+          align: "center"
+        }),
+        new Label({
+          text: "⭐",
+          size: 40,
+          align: "center"
+        }),
+        //        new Label({text: "🥶",size: 40,align: "center"})
+        new Label({
+          text: "\u{1F4A9}",
+          size: 40,
+          align: "center"
+        }),
+        new Label({
+          text: "👨‍🚀",
+          size: 40,
+          align: "center"
+        }),
+        new Label({
+          text: "🛶",
+          size: 40,
+          align: "center"
+        }),
+        new Label({
+          text: "🌳",
+          size: 40,
+          align: "center"
+        })
 
 
       ];
@@ -181,10 +226,55 @@
       } // end of setUpEmitter
 
 
+      function setUpUi() {
+        var panel;
+
+        panel = new Panel({
+        		width:400,
+        		height:300,
+            titleBar:series("data page 1", "data page 2"),
+        		close:false,
+        		displayClose:false,
+        		draggable:true,
+        		bar:"Pane"
+        	});
+
+          // content for panel 1
+          var dataTab1 = new Container(panel.width, panel.height).addTo(panel);
+          dataTab1.center(panel);
+
+          var stepperPartNum = new Stepper({continuous:false, stepperType:"number", min:1, max:9})
+            .pos(15, 50, false, false, dataTab1).sca(.25);
+          stepperPartNum.currentValue = partNum;
+          stepperPartNum.on("change", function() {
+            partNum = stepperPartNum.selectedIndex;
+            stage.update();
+          });
+          // new Label({
+          //     text: "partNum",
+          //     size: 17,
+          //     color: black,
+          //     align: "left"
+          //   }).addTo(dataTab1);
+
+          // var partNum = 1;
+          // var partForce = 0.31;
+          // var partSinkForce = 0.3;
+          // var partInterval = 500;
+          // var partLife = 8000;
+          // // level parameters
+          // var maxTimeInLevel = 15;
+          // var curLevel = 0;
+
+
+//        pane.show(); // pressing anywhere will close pane (see parameters for options)
+          panel.addTo().pos(50,50);
+      } // end of setUpUi()
+
       setupPlayerToken();
       setupButton();
       setUpEmitter();
-
+      setUpUi();
 
       var tickerFunction = Ticker.add(function() {
         var p = particles.particles.children; // p is the array of individual Particles
@@ -223,6 +313,7 @@
         }
         displayHitText.text = "Current Level: " + curLevel + "  Time: " + countDownTimer;
       }, stage);
+
 
       stage.update(); // this is needed to show any changes
 
