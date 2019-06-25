@@ -10,15 +10,7 @@
   <!-- use zimjs.com/distill for minified individual functions! -->
 
   <script>
-
-    var circle; // attracts the particles and is draggable
-    var particles; // the Emitter
-
-    var displayHitText; //msg label in panel
-    var stepperPartNum;
-    var stepperPartForce;
-
-    var assets = ["C_D_E_D.001.mp3"];  // sound or image assets to be loaded
+    var assets = ["C_D_E_D.001.mp3"]; // sound or image assets to be loaded
     var path = "assets/";
 
     var frame = //new Frame(scaling, width, height, color, outerColor);
@@ -32,28 +24,28 @@
       var stageW = frame.width;
       var stageH = frame.height;
       // put your code here
-
       localStorage.clear(); // uncomment to reset localStorage
-    	var data; // will hold all the data for the scores, sizes, max and circles
-    	if (localStorage && localStorage.game) {
-    		// 2. if there is localStorage data then set the data to the localStorage data
-    		data = JSON.parse(localStorage.game);
-    	} else {
-    		// 3. if there is not localStorage data then set the data to starting values
-    		data = {
-          score:0,
-          high:0,
+      var data; // will hold all the data for the scores, sizes, max and circles
+      if (localStorage && localStorage.game) {
+        // 2. if there is localStorage data then set the data to the localStorage data
+        data = JSON.parse(localStorage.game);
+      } else {
+        // 3. if there is not localStorage data then set the data to starting values
+        data = {
+          score: 0,
+          high: 0,
           // particle parameters
-          partNum:1,
-          partForce:0.31,
-          partSinkForce:0.3,
-          partInterval:500,
-          partLife:8000,
+          partNum: 1,
+          partForce: 0.3,
+          partSinkForce: 0.3,
+          partInterval: 500,
+          partLife: 8000,
           // level parameters
-          maxTimeInLevel:5,
-          curLevel:0,
+          maxTimeInLevel: 5,
+          curLevel: 0,
+          godMode: false
         };
-    	}
+      }
 
       // read in default data, from stored or initialized data
       // particle parameters
@@ -64,36 +56,61 @@
       var partLife = data.partLife;
       // level parameters
       var maxTimeInLevel = data.maxTimeInLevel;
+      var godMode = data.godMode;
+      var curLevel = 0; //init level not read in
 
-      //init level
-      var curLevel = 0;
+      var levelLabel; //msg label in panel
+      var countdownLabel;
+      var stepperPartNum = null;
+      var stepperPartForce = null;
+      var stepperPartSinkForce = null;
+      var stepperPartInterval = null;
+      var stepperPartLife = null;
+      var stepperMaxTimeInLevel = null;
 
       var backgroundCircleBelow = new Circle(stageH / 2 + 70, "#111111").centerReg(stage);
       var backgroundCircleTop = new Circle(stageH / 2 - 50, "#333333").centerReg(stage);
       var theCenter = new Circle(10, orange).centerReg(stage);
 
+      var circle; // attracts the particles and is draggable
+      var particles; // the Emitter
+
       var countDownTimer = maxTimeInLevel;
       var countingTime = true;
 
+      // counting down from maxTimeInLevel to 0, then inc level
       // repeat after a second = 1000 ms
       var iv = interval(1000, function() {
         if (countingTime == true) {
-          if (countDownTimer > 0)
+          if (countDownTimer > 0) {
             countDownTimer--;
-          else {
-            // timer is 0; remove emitter, setup new one with next params
+            countdownLabel.text = "Time: " + countDownTimer
+          } else {
+            // timer is now 0; remove emitter
             particles.particles.removeFrom(stage);
+
             curLevel++;
+            //reset timer
             countDownTimer = maxTimeInLevel;
 
-            //data.partNum = data.partNum + 1;
-            stepperPartNum.currentValue = data.partNum;
-            stepperPartForce.currentValue = data.partForce;
+            countdownLabel.text = "Time: " + countDownTimer
+            levelLabel.text = "Current Level: " + curLevel.toString().padStart(2, '0');
+            
+            // display new emitter params on steppers
+            //partNum++;
+
+            stepperPartNum.currentVal = partNum;
+            stepperPartForce.currentValue = partForce;
+            stepperPartSinkForce.currentValue = partSinkForce;
+            stepperPartInterval.currentValue = partInterval;
+            stepperPartLife.currentValue = partLife;
+            stepperMaxTimeInLevel.currentValue = maxTimeInLevel;
 
             setUpEmitter();
           }
         }
       });
+
 
       function setupPlayerToken() {
         // random x y
@@ -104,7 +121,7 @@
             text: "🐄",
             size: 40,
             align: "center",
-            reg: true  // register point --> center point of label
+            reg: true // register point --> center point of label
           })
           .addTo(stage)
           .pos(startPosx, startPosy)
@@ -197,11 +214,11 @@
             }
           },
           interval: partInterval,
-          num: data.partNum,
+          num: partNum,
           life: partLife,
           fade: false,
           shrink: false,
-            force: partForce,
+          force: partForce,
           gravity: 0,
           animation: {
             obj: {
@@ -226,102 +243,216 @@
 
       function setUpUi() {
         var panel = new Panel({
-        		width:400,
-        		height:300,
-            titleBar:series("data page 1", "data page 2"),
-//        		close:false,
-//        		displayClose:false,
-        		draggable:true
-//        		bar:"Pane"
-        	});
+          width: 400,
+          height: 300,
+          titleBar: series("data page 1", "data page 2"),
+          //        		close:false,
+          //        		displayClose:false,
+          draggable: true
+          //        		bar:"Pane"
+        });
 
-          // content for panel 1
-          var dataTab1 = new Container(panel.width, panel.height).center(panel);
+        // content for panel 1
+        var dataTab1 = new Container(panel.width, panel.height).center(panel);
+        var col1X = 15;
+        var col1Y = 50;
+        // -------------------------------------------------------------------
+        stepperPartNum = new Stepper({
+            continuous: false,
+            stepperType: "number",
+            min: 0,
+            max: 1000
+          })
+          .pos(col1X, col1Y, false, false, dataTab1).sca(.25);
+        stepperPartNum.currentValue = partNum;
+        stepperPartNum.on("change", function() {
+          partNum = stepperPartNum.currentValue;
+          stage.update();
+        });
+        new Label({
+          text: "partNum",
+          size: 17,
+          color: black,
+          align: "left"
+        }).addTo(dataTab1).pos(col1X + 110, col1Y + 3);
+        // -------------------------------------------------------------------
+        stepperPartForce = new Stepper({
+            continuous: false,
+            stepperType: "number",
+            min: 0,
+            max: 20,
+            step: 0.10
+          })
+          .pos(col1X, col1Y + 35, false, false, dataTab1).sca(.25);
+        //stepperPartForce.currentValue = Number.parseFloat(partForce).toFixed(2);
+        stepperPartForce.currentValue = partForce;
+        stepperPartForce.on("change", function() {
+          partForce = stepperPartForce.currentValue;
+          stage.update();
+        });
+        new Label({
+          text: "partForce",
+          size: 17,
+          color: black,
+          align: "left"
+        }).addTo(dataTab1).pos(col1X + 110, col1Y + 35 + 3);
+        // -------------------------------------------------------------------
+        // var partSinkForce = 0.3;
+        stepperPartSinkForce = new Stepper({
+            continuous: false,
+            stepperType: "number",
+            min: 0.00,
+            max: 20.00,
+            step: 0.10
+          })
+          .pos(col1X, col1Y + 35 + 35, false, false, dataTab1).sca(.25);
+        stepperPartSinkForce.currentValue = Number.parseFloat(partSinkForce).toFixed(2);
+        stepperPartSinkForce.on("change", function() {
+          partSinkForce = stepperPartSinkForce.currentValue;
+          stage.update();
+        });
+        new Label({
+          text: "partSinkForce",
+          size: 17,
+          color: black,
+          align: "left"
+        }).addTo(dataTab1).pos(col1X + 110, col1Y + 35 + 35 + 3);
+        // -------------------------------------------------------------------
+        // var partInterval = 500;
+        stepperPartInterval = new Stepper({
+            continuous: false,
+            stepperType: "number",
+            min: 0,
+            max: 10000,
+            step: 500
+          })
+          .pos(col1X, col1Y + 35 + 35 + 35, false, false, dataTab1).sca(.25);
+        stepperPartInterval.currentValue = partInterval;
+        stepperPartInterval.on("change", function() {
+          partInterval = stepperPartInterval.currentValue;
+          stage.update();
+        });
+        new Label({
+          text: "partInterval",
+          size: 17,
+          color: black,
+          align: "left"
+        }).addTo(dataTab1).pos(col1X + 110, col1Y + 35 + 35 + 35 + 3);
+        // -------------------------------------------------------------------
+        // var partLife = 8000;
+        stepperPartLife = new Stepper({
+            continuous: false,
+            stepperType: "number",
+            min: 0,
+            max: 13000,
+            step: 500
+          })
+          .pos(col1X, col1Y + 35 + 35 + 35 + 35, false, false, dataTab1).sca(.25);
+        stepperPartLife.currentValue = partLife;
+        stepperPartLife.on("change", function() {
+          partLife = stepperPartLife.currentValue;
+          stage.update();
+        });
+        new Label({
+          text: "partLife",
+          size: 17,
+          color: black,
+          align: "left"
+        }).addTo(dataTab1).pos(col1X + 110, col1Y + 35 + 35 + 35 + 35 + 3);
+        // -------------------------------------------------------------------
+        // var maxTimeInLevel = 15;
+        stepperMaxTimeInLevel = new Stepper({
+            continuous: false,
+            stepperType: "number",
+            min: 0,
+            max: 1000,
+            step: 1
+          })
+          .pos(col1X, col1Y + 35 + 35 + 35 + 35 + 35, false, false, dataTab1).sca(.25);
+        stepperMaxTimeInLevel.currentValue = maxTimeInLevel;
+        stepperMaxTimeInLevel.on("change", function() {
+          maxTimeInLevel = stepperMaxTimeInLevel.currentValue;
+          stage.update();
+        });
+        new Label({
+          text: "max Time in Level",
+          size: 17,
+          color: black,
+          align: "left"
+        }).addTo(dataTab1).pos(col1X + 110, col1Y + 35 + 35 + 35 + 35 + 35 + 3);
+        // -------------------------------------------------------------------
+        var checkBox = new CheckBox({
+            label: "god mode",
+            size: 90,
+            startChecked: false
+          })
+          .sca(.25)
+          .addTo(dataTab1).pos(col1X, col1Y + 35 + 35 + 35 + 35 + 35 + 35);
+        checkBox.on("change", function() {
+          if (checkBox.checked) {
+            godMode = true;
+          } else {
+            godMode = false;
+          }
+        });
 
-          // var partNum = 1;
-          stepperPartNum = new Stepper(
-              {continuous:false, stepperType:"number", min:1, max:9})
-              .pos(15, 50, false, false, dataTab1).sca(.25);
-            stepperPartNum.currentValue = data.partNum;
-            stepperPartNum.on("change", function() {
-              data.partNum = stepperPartNum.selectedIndex;
-              stage.update();
+        levelLabel = new Label({
+//            text: "Current Level: " + curLevel.toString().padStart(2, '0'),
+            text: "Current Level: " + curLevel,
+            size: 16,
+            color: black,
+            align: "left"
+          })
+          .addTo(dataTab1)
+          .pos(250, col1Y);
+
+        countdownLabel = new Label({
+            text: "Time: " + countDownTimer,
+            size: 16,
+            color: black,
+            align: "left"
+          })
+          .addTo(dataTab1)
+          .pos(250, col1Y + 35);
+
+
+        // content for panel 2
+        var dataTab2 = new Container(panel.width, panel.height); // don't .center(panel) yet
+        // text label displaying messages
+
+        var button = new Button({
+          label: "STOP",
+          toggle: "START"
+//        }).addTo(dataTab2).pos(50, 100);
+}).addTo(dataTab2).pos(100, panel.height -100);
+
+        button.on("click", function() {
+          if (countDownTimer != 0) {
+            iv.pause(button.toggled);
+          } else {
+            //countDownTimer = 10;
+          }
+          var sound = frame.asset("C_D_E_D.001.mp3").play({
+            interrupt: "any",
+            volume: 0.2,
+            loop: 0,
+            pan: 0
           });
-          new Label({
-              text: "partNum",
-              size: 17,
-              color: black,
-              align: "left"
-            }).addTo(dataTab1).pos(125, 53);
+          //particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
+        });
 
-          // var partForce = 0.31;
-          stepperPartForce = new Stepper(
-            {continuous:false, stepperType:"number", min:0.00, max:20.00,step:0.25})
-            .pos(15, 150, false, false, dataTab1).sca(.25);
-          stepperPartForce.currentValue = partForce;
-          stepperPartForce.on("change", function() {
-            partForce = stepperPartForce.selectedIndex;
-            stage.update();
-          });
-          new Label({
-              text: "partForce",
-              size: 17,
-              color: black,
-              align: "left"
-            }).addTo(dataTab1).pos(125, 153);
+        // event to change content as panels change
+        panel.on("change", function() {
+          if (dataTab2.parent) {
+            dataTab2.removeFrom();
+            dataTab1.center(panel);
+          } else {
+            dataTab1.removeFrom();
+            dataTab2.center(panel);
+          }
+        });
 
-          // var partSinkForce = 0.3;
-          // var partInterval = 500;
-          // var partLife = 8000;
-          // // level parameters
-          // var maxTimeInLevel = 15;
-          // var curLevel = 0;
-
-
-          // content for panel 2
-          var dataTab2 = new Container(panel.width, panel.height);  // don't .center(panel) yet
-          // text label displaying messages
-          displayHitText = new Label({
-              text: " ",
-              size: 17,
-              color: black,
-              align: "left"
-            })
-            .addTo(dataTab2)
-            .pos(50, 50);
-
-            var button = new Button({
-              label: "STOP",
-              toggle: "START"
-            }).addTo(dataTab2).pos(50, 100);
-
-            button.on("click", function() {
-              if (countDownTimer != 0) {
-                iv.pause(button.toggled);
-              } else {
-                //countDownTimer = 10;
-              }
-              var sound = frame.asset("C_D_E_D.001.mp3").play({
-                interrupt: "any",
-                volume: 0.2,
-                loop: 0,
-                pan: 0
-              });
-              //particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
-            });
-
-          // event to change content as panels change
-          panel.on("change", function () {
-             if (dataTab2.parent) {
-                dataTab2.removeFrom();
-                dataTab1.center(panel);
-             } else {
-                dataTab1.removeFrom();
-                dataTab2.center(panel);
-             }
-          });
-
-          panel.addTo().pos(50,50);
+        panel.addTo().pos(50, 50);
       } // end of setUpUi()
 
       setupPlayerToken();
@@ -335,9 +466,10 @@
         var wasHit = false;
         var cc = 0;
 
+        // circle hit testing  the particles
         for (cc = 0; cc < numElem; cc++) {
           wasHit = circle.hitTestBounds(other = p[cc], margin = -10);
-          if (wasHit) {
+          if (wasHit && !godMode) {
             index = 0;
             break;
           }
@@ -352,9 +484,9 @@
           // pulse the player token
           circle.animate({
             props: {
-              scale: 2.0
+              scale: 1.5
             },
-            time: 250,
+            time: 150,
             ease: "linear",
             loop: 0,
             rewind: true,
@@ -363,10 +495,9 @@
         } else {
           // nothing was hit
         }
-        displayHitText.text = "Current Level: " + curLevel + "  Time: " + countDownTimer;
-      }, stage);
+      }, stage); // end of tickerFunction()
 
-
+      stage.update()
     }); // end of ready
   </script>
   <meta name="viewport" content="width=device-width, user-scalable=no" />
