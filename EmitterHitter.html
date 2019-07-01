@@ -47,8 +47,6 @@
         };
       }
 
-//      var
-
       // define save function for data
       function saveTolocalStorage() {
         //        data.score = Math.round(s);
@@ -66,9 +64,7 @@
         data.maxTimeInLevel = maxTimeInLevel;
         data.godMode = godMode;
         //data.curLevel = 0;
-
         localStorage.game = JSON.stringify(data);
-
       }
 
       // read in default data, from stored or initialized data
@@ -184,7 +180,7 @@
           ////   new Triangle(40, 40, 40, null, [darker, lighter], 2)
           obj: theNewEmitterParticle,
           random: {
-            //          color: colorPal_Gold,
+            color: ["#adff00","#74d600","#028900","#00d27f","#00ff83"],  // https://www.color-hex.com/color-palette/1325
             rotation: {
               min: -360,
               max: 360
@@ -228,11 +224,11 @@
           width: 400,
           height: 300,
           titleBar: series("data page 1", "data page 2"),
-          draggable: true
+          draggable: true,
         });
 
         // content for panel 1
-        var dataTab1 = new Container(panel.width, panel.height); //.center(panel); // initial adding to panel makes this the default
+        var dataTab1 = new Container(panel.width, panel.height);//.center(panel); // initial adding to panel makes this the default
 
         var col1X = 15;
         var col1Y = 50;
@@ -394,17 +390,48 @@
           })
           .addTo(dataTab1)
           .pos(250, col1Y + 35);
+// -------------------------------------------------------------------
+// content for panel 2
 
+        var win = new Window({
+          width: 320,
+          height: 200,
+          backgroundColor:"#EEEEEE",
+          borderColor:red,
+          borderWidth:2,
+          corner:20,
+          scrollBarActive:true,
+          scrollBarDrag:true,
+          scrollBarColor:green,
+          scrollBarAlpha:1.0,
+          scrollBarH:false,
+          scrollBarV:true,
+          slideDamp: 1,
+          slideSnap:"auto", //(default "vertical") "auto" / true, "none" / false, "horizontal"
+          interactive: true,
+          paddingHorizontal:0,  // no effect
+          paddingHorizontal:0
+        });
 
-        // content for panel 2
         var dataTab2 = new Container(panel.width, panel.height).center(panel); // initial adding to panel makes this the default
+        win.center(dataTab2);
 
-        var utf8Arr = ["\u{1F4A9}", "😲", "⭐", "\u{1F600}", "♻️", "⌚", "⌛", "♾️", "⌛", "Ⓜ️", "⚪", "⚫", "⛏️", "⛑️", "✨", "❓", "〽️", "🍾", "🥐", "🥞",
-          "🦄", "🧀", "🧦", "⛔", "⛵", "🏆", "👀", "🕋", "🕎", "💃", "🏄", "🚴", "🛀", "👯", "👣", "👨", "🛶", "🌳", "🤩", "😍", "😵", "👻", "💋", "💣",""
+        var utf8Arr = [
+          "\u{1F4A9}", "😲", "⭐", "\u{1F600}", "♻️", "⌚", "⌛",
+          "♾️", "⌛", "Ⓜ️", "⚪", "⚫", "⛏️", "⛑️",
+          "✨", "❓", "〽️", "🍾", "🥐", "🥞","🦄",
+          "🧀", "🧦", "⛔", "⛵", "🏆", "👀", "🕋",
+          "🕎", "💃", "🏄", "🚴", "🛀", "👯", "👣",
+          "👨", "🛶", "🌳", "🤩", "😍", "😵", "👻",
+          "💋", "💣","🛒","🛸" ,"🤺" ,"⛳" ,"🌠" ,
+          "🌀" ,"🉐", "🎠", "🖕", "🛅", "⭕", "🏰",
+          "😘" ,"🚀", "🛠️", "🛬", "⚽", "🀄", "⬇️",
+          "❄️", "🧝", "🤾", "👼", "🦅", "🥫", "🤯",
+          "🗣️", "⛢", "🗑️", "🗻", "🗿", "🐾", "🐀"
         ];
 
-          var tColNum = 9;
-          var tRowNum = 5;
+          var tColNum = 7;
+          var tRowNum = 11 ;
           var arrayOfLabels = [];
           var pSize = 26;
 
@@ -412,7 +439,7 @@
             // backgroundColor:"transparent" removes the onChange listener of the panel! ??
             var tmp = new Label({text: utf8Arr[i],size: pSize, backgroundColor:"#EEEEEE", backgroundBorderWidth:1, paddingHorizontal:3, paddingVertical: 7});
             tmp.on("click", function (e) {
-              zog("clicked over: " +  this.label.text);
+              //zog("clicked over: " +  this.label.text);
               theNewEmitterParticle.label.text = e.target.text;
             });
             arrayOfLabels.push(tmp);
@@ -420,10 +447,9 @@
 
           // make Tile - note, assets will be cloned unless set clone:false in Tile
           var tile = new Tile({
-              // obj:series([a,b,c,d,e,f,g,h]),
               obj:series(arrayOfLabels),
               //width:100,
-              height:80,
+              //height:80,
               cols:tColNum,
               rows:tRowNum,
               spacingH:0,
@@ -433,25 +459,11 @@
               align:"center",
               valign:"center",
               clone:false,
-              colSize:tColNum * 4 // ignored if width set
+              colSize:43 // ignored if width set
           });
 
-          tile.remake().center(dataTab2);
-//          tile.center(dataTab2);
+          win.add(tile.remake());
 
-          // var win = new Window({
-          //   width: 380,
-          //   height: 280,
-          //   interactive: false,
-          //   padding: 0,
-          //   slideDamp: .2
-          // });
-          // win.add(panel); // add the content to the window
-          // win.center(stage);
-
-        // .change(function(e) {
-        //     theNewEmitterParticle.label.text = e.target.text;
-        // });
 
         // var button = new Button({
         //   label: "STOP",
@@ -477,15 +489,22 @@
         // event to change content as panels change
         panel.on("change", function() {
           if (dataTab2.parent) {
+            win.removeFrom();
             dataTab2.removeFrom();
             dataTab1.center(panel);
           } else {
             dataTab1.removeFrom();
             dataTab2.center(panel);
+//            win.add(tile.remake());
+            win.addTo(dataTab2);
+//            tile.remake().center(dataTab2);
           }
+          stage.update()
         });
 
+
         panel.addTo(stage).pos(50, 50);
+        //win.addTo(dataTab2);
 
       } // end of setUpUi()
 
