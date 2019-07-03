@@ -4,9 +4,12 @@
 <head>
   <meta charset="utf-8" />
   <title>EmitterHitter</title>
-
+  <script src="https://zimjs.org/cdn/1.2.0/createjs_min.js"></script>
+  <script src="https://zimjs.org/cdn/10.5.1/zim.js"></script>
+  <!--
   <script src="https://d309knd7es5f10.cloudfront.net/createjs_1.1_min.js"></script>
   <script src="https://d309knd7es5f10.cloudfront.net/zim_10.4.1.js"></script>
+-->
   <!-- use zimjs.com/distill for minified individual functions! -->
 
   <script>
@@ -48,6 +51,17 @@
         };
       }
 
+      var uiData; // holds state of panel/symbolButton
+      if (localStorage && localStorage.ui) {
+        // 2. if there is localStorage data then set the data to the localStorage data
+        uiData = JSON.parse(localStorage.ui);
+      } else {
+        // 3. if there is not localStorage data then set the data to starting values
+        uiData = {
+          panelSymbolized: true
+        };
+      }
+
       // define save function for data
       function saveTolocalStorage() {
         // read in default data, from stored or initialized data
@@ -66,6 +80,11 @@
         localStorage.game = JSON.stringify(data);
       }
 
+      function savePanelStateTolocalStorage() {
+        uiData.panelSymbolized = panelSymbolized;
+        localStorage.ui = JSON.stringify(uiData);
+      }
+
       // read in default data, from stored or initialized data
       var score = data.score;
       var high = data.high;
@@ -81,6 +100,7 @@
       var godMode = data.godMode;
       var curLevel = 0; //init level not read in
       var theNewEmitterParticleText = data.theNewEmitterParticleText;
+      var panelSymbolized = uiData.panelSymbolized;
 
       var levelLabel; //msg label in panel
       var countdownLabel;
@@ -105,6 +125,16 @@
         text: theNewEmitterParticleText,
         size: 40,
         align: "center"
+      });
+
+      // symbol button when panel is minimzed
+      var symBut = new Label({
+        text: "M",
+        size: 17,
+        color: white,
+        backgroundColor: orange,
+        align: "center",
+        corner: 19
       });
 
       // counting down from maxTimeInLevel to 0, then inc level
@@ -180,7 +210,7 @@
           ////   new Triangle(40, 40, 40, null, [darker, lighter], 2)
           obj: theNewEmitterParticle,
           random: {
-            color: ["#adff00","#74d600","#028900","#00d27f","#00ff83"],  // https://www.color-hex.com/color-palette/1325
+            color: ["#adff00", "#74d600", "#028900", "#00d27f", "#00ff83"], // https://www.color-hex.com/color-palette/1325
             rotation: {
               min: -360,
               max: 360
@@ -212,6 +242,7 @@
           },
           sink: circle,
           sinkForce: partSinkForce,
+          cache: true,
           startPaused: false
         }).centerReg(stage);
       } // end of setUpEmitter
@@ -223,28 +254,26 @@
           height: 300,
           titleBar: series("data page 1", "data page 2"),
           draggable: true,
-          extraButton : true
+          extraButton: true
         });
 
-      // extra Button of Panel, and hiding/showing functionality
-      var symBut;
-       var exBut = panel.extraButton;
-       exBut.label.text="C";
-       exBut.on("click", function (e) {
-         symBut = new Label({
-           text: "M",
-           size: 17,
-           color: white,
-           backgroundColor: orange,
-           align: "center",
-           corner: 19
-         }).addTo(stage).pos(50,50).drag();
-         symBut.on("click", function (e){
-           panel.addTo(stage).pos(50, 50);
-           symBut.removeFrom();
-         });
-         panel.removeFrom();
-       });
+        // extra Button of Panel, and hiding/showing functionality
+        var exBut = panel.extraButton;
+        exBut.label.text = "C";
+        exBut.on("click", function(e) {
+          symBut.on("click", function(e) {
+            panelSymbolized = false;
+            savePanelStateTolocalStorage();
+            panel.addTo(stage).pos(50, 50);
+            symBut.removeFrom();
+          });
+          panelSymbolized = true;
+          savePanelStateTolocalStorage();
+          symBut.addTo(stage).pos(50, 50).drag();
+          panel.removeFrom();
+        });
+
+
 
         // content for panel 1
         var dataTab1 = new Container(panel.width, panel.height).center(panel); // initial adding to panel makes this the default
@@ -410,116 +439,123 @@
           })
           .addTo(dataTab1)
           .pos(250, col1Y + 35);
-      // -------------------------------------------------------------------
+        // -------------------------------------------------------------------
 
-          var buttonLabel = new Label({
-              text: "Store",
-              size: 16,
-              color: black,
-              align: "center"
-            });
+        var buttonLabel = new Label({
+          text: "Store",
+          size: 16,
+          color: black,
+          align: "center"
+        });
 
-          var storeButton = new Button({
-            width:130,
-            height:35,
+        var storeButton = new Button({
+            width: 130,
+            height: 35,
             label: buttonLabel
           }).addTo(dataTab1)
           .pos(250, col1Y + 35 + 35);
 
-          storeButton.on("click", function(e) {
-              saveTolocalStorage();
-          });
+        storeButton.on("click", function(e) {
+          saveTolocalStorage();
+        });
 
-          // button.on("click", function() {
-          //   if (countDownTimer != 0) {
-          //     iv.pause(button.toggled);
-          //   } else {
-          //     //countDownTimer = 10;
-          //   }
-          //   var sound = frame.asset("C_D_E_D.001.mp3").play({
-          //     interrupt: "any",
-          //     volume: 0.2,
-          //     loop: 0,
-          //     pan: 0
-          //   });
-          //   //particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
-          // });
+        // button.on("click", function() {
+        //   if (countDownTimer != 0) {
+        //     iv.pause(button.toggled);
+        //   } else {
+        //     //countDownTimer = 10;
+        //   }
+        //   var sound = frame.asset("C_D_E_D.001.mp3").play({
+        //     interrupt: "any",
+        //     volume: 0.2,
+        //     loop: 0,
+        //     pan: 0
+        //   });
+        //   //particles.pauseEmitter(button.toggled, freeze = true, immediate = true);
+        // });
 
 
-// -------------------------------------------------------------------
-// content for panel 2
+        // -------------------------------------------------------------------
+        // content for panel 2
 
         var win = new Window({
           width: 320,
           height: 200,
-          backgroundColor:"#EEEEEE",
-          borderColor:red,
-          borderWidth:2,
-          corner:20,
-          scrollBarActive:true,
-          scrollBarDrag:true,
-          scrollBarColor:green,
-          scrollBarAlpha:1.0,
-          scrollBarH:false,
-          scrollBarV:true,
+          backgroundColor: "#EEEEEE",
+          borderColor: red,
+          borderWidth: 2,
+          corner: 20,
+          scrollBarActive: true,
+          scrollBarDrag: true,
+          scrollBarColor: green,
+          scrollBarAlpha: 1.0,
+          scrollBarH: false,
+          scrollBarV: true,
           slideDamp: 1,
-          slideSnap:"auto", //(default "vertical") "auto" / true, "none" / false, "horizontal"
+          slideSnap: "auto", //(default "vertical") "auto" / true, "none" / false, "horizontal"
           interactive: true,
-          paddingHorizontal:0,  // no effect
-          paddingHorizontal:0
+          paddingHorizontal: 0, // no effect
+          paddingHorizontal: 0
         });
 
-        var dataTab2 = new Container(panel.width, panel.height);//.center(panel); // initial adding to panel makes this the default
+        var dataTab2 = new Container(panel.width, panel.height); //.center(panel); // initial adding to panel makes this the default
         win.center(dataTab2);
 
         var utf8Arr = [
           "\u{1F4A9}", "😲", "⭐", "\u{1F600}", "♻️", "⌚", "⌛",
           "♾️", "⌛", "Ⓜ️", "⚪", "⚫", "⛏️", "⛑️",
-          "✨", "❓", "〽️", "🍾", "🥐", "🥞","🦄",
+          "✨", "❓", "〽️", "🍾", "🥐", "🥞", "🦄",
           "🧀", "🧦", "⛔", "⛵", "🏆", "👀", "🕋",
           "🕎", "💃", "🏄", "🚴", "🛀", "👯", "👣",
           "👨", "🛶", "🌳", "🤩", "😍", "😵", "👻",
-          "💋", "💣","🛒","🛸" ,"🤺" ,"⛳" ,"🌠" ,
-          "🌀" ,"🉐", "🎠", "🖕", "🛅", "⭕", "🏰",
-          "😘" ,"🚀", "🛠️", "🛬", "⚽", "🀄", "⬇️",
+          "💋", "💣", "🛒", "🛸", "🤺", "⛳", "🌠",
+          "🌀", "🉐", "🎠", "🖕", "🛅", "⭕", "🏰",
+          "😘", "🚀", "🛠️", "🛬", "⚽", "🀄", "⬇️",
           "❄️", "🧝", "🤾", "👼", "🦅", "🥫", "🤯",
           "🗣️", "⛢", "🗑️", "🗻", "🗿", "🐾", "🐀"
         ];
 
-          var tColNum = 7;
-          var tRowNum = 11 ;
-          var arrayOfLabels = [];
-          var pSize = 26;
+        var tColNum = 7;
+        var tRowNum = 11;
+        var arrayOfLabels = [];
+        var pSize = 26;
 
-          for (i=0;i<=utf8Arr.length;i++) {
-            // backgroundColor:"transparent" removes the onChange listener of the panel! ??
-            var tmp = new Label({text: utf8Arr[i],size: pSize, backgroundColor:"#EEEEEE", backgroundBorderWidth:1, paddingHorizontal:3, paddingVertical: 7});
-            tmp.on("click", function (e) {
-              //zog("clicked over: " +  this.label.text);
-              theNewEmitterParticle.label.text = e.target.text;
-              theNewEmitterParticleText = theNewEmitterParticle.label.text;
-            });
-            arrayOfLabels.push(tmp);
-          }
-
-          // make Tile - note, assets will be cloned unless set clone:false in Tile
-          var tile = new Tile({
-              obj:series(arrayOfLabels),
-              //width:100,
-              //height:80,
-              cols:tColNum,
-              rows:tRowNum,
-              spacingH:0,
-              spacingV:0,
-              squeezeH:false,
-              squeezeV:false, // try setting to true - did not bother with example interface
-              align:"center",
-              valign:"center",
-              clone:false,
-              colSize:43 // ignored if width set
+        for (i = 0; i <= utf8Arr.length; i++) {
+          // backgroundColor:"transparent" removes the onChange listener of the panel! ??
+          var tmp = new Label({
+            text: utf8Arr[i],
+            size: pSize,
+            backgroundColor: "#EEEEEE",
+            backgroundBorderWidth: 1,
+            paddingHorizontal: 3,
+            paddingVertical: 7
           });
+          tmp.on("click", function(e) {
+            //zog("clicked over: " +  this.label.text);
+            theNewEmitterParticle.label.text = e.target.text;
+            theNewEmitterParticleText = theNewEmitterParticle.label.text; // for storage
+          });
+          arrayOfLabels.push(tmp);
+        }
 
-          win.add(tile.remake());
+        // make Tile - note, assets will be cloned unless set clone:false in Tile
+        var tile = new Tile({
+          obj: series(arrayOfLabels),
+          //width:100,
+          //height:80,
+          cols: tColNum,
+          rows: tRowNum,
+          spacingH: 0,
+          spacingV: 0,
+          squeezeH: false,
+          squeezeV: false, // try setting to true - did not bother with example interface
+          align: "center",
+          valign: "center",
+          clone: false,
+          colSize: 43 // ignored if width set
+        });
+
+        win.add(tile.remake());
 
 
         // event to change content as panels change
@@ -536,7 +572,20 @@
           stage.update()
         });
 
-        panel.addTo(stage).pos(50, 50);
+        if (panelSymbolized) {
+          symBut.addTo(stage).pos(50, 50).drag();
+          symBut.on("click", function(e) {
+            panelSymbolized = false;
+            savePanelStateTolocalStorage();
+            panel.addTo(stage).pos(50, 50);
+            symBut.removeFrom();
+          });
+          panel.removeFrom();
+        } else {
+          panel.addTo(stage).pos(50, 50);
+          symBut.removeFrom();
+        }
+
       } // end of setUpUi()
 
       setupPlayerToken();
