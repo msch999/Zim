@@ -165,7 +165,7 @@
             stepperPartLife.currentValue = partLife;
             stepperMaxTimeInLevel.currentValue = maxTimeInLevel;
 
-            theNewEmitterParticle.label.text = theNewEmitterParticleText;
+            //theNewEmitterParticle.label.text = theNewEmitterParticleText;
 
             // theNewEmitterParticle = new Label({
             //   text: theNewEmitterParticleText,
@@ -207,53 +207,59 @@
 
       function setUpEmitter() {
         particles = new zim.Emitter({
-          // obj: [new Circle(20, null, [darker, lighter], 2),
-          //   new Rectangle(30, 30, null, [darker, lighter], 2),
-          ////   new Triangle(40, 40, 40, null, [darker, lighter], 2)
-          obj: theNewEmitterParticle,
-          random: {
-            color: ["#adff00", "#74d600", "#028900", "#00d27f", "#00ff83"], // https://www.color-hex.com/color-palette/1325
-            rotation: {
-              min: -360,
-              max: 360
+            // obj: [new Circle(20, null, [darker, lighter], 2),
+            //   new Rectangle(30, 30, null, [darker, lighter], 2),
+            ////   new Triangle(40, 40, 40, null, [darker, lighter], 2)
+            obj: theNewEmitterParticle,
+            interval: partInterval,
+            num: partNum,
+            life: partLife,
+            fade: false,
+            shrink: false,
+            decayTime: 1000,
+            decayStart: null,
+            trace: false,
+            force: partForce,
+            gravity: 0,
+            wind: 0,
+            animation: {
+              obj: {
+                rotation: ["360", "-360"],
+                //scale: 0.7   // smoother without
+              },
+              loop: true,
+              time: {
+                min: 4000,
+                max: 5000
+              },
+              ease: "linear",
+              from: false
             },
-            scale: {
-              min: 0.7,
-              max: 1.0
-            }
-          },
-          interval: partInterval,
-          num: partNum,
-          life: partLife,
-          fade: false,
-          shrink: false,
-          force: partForce,
-          gravity: 0,
-          wind:0,
-          decayTime:1000,
-          decayStart:null,
-          trace:false,
-          animation: {
-            obj: {
-              rotation: ["360", "-360"],
-              //scale: 0.7   // smoother without
+            random: {
+              color: ["#adff00", "#74d600", "#028900", "#00d27f", "#00ff83"], // https://www.color-hex.com/color-palette/1325
+              rotation: {
+                min: -360,
+                max: 360
+              },
+              scale: {
+                min: 0.7,
+                max: 1.0
+              }
             },
-            loop: true,
-            time: {
-              min: 10000, //4000,
-              max: 10000 //5000
-            },
-            ease: "linear",
-            from: false
-          },
-          sink: circle,
-          sinkForce: partSinkForce,
-          cache: null,
-          startPaused: false,
-          pool: true,
-          poolMin: 2
-        }).centerReg(stage);
+            sink: circle,
+            sinkForce: partSinkForce,
+            cache: false,
+            events: false,
+            startPaused: false,
+            pool: true,
+            poolMin: 1
+          })
+          .centerReg(stage);
       } // end of setUpEmitter
+
+      // particles.on("emitted", function(e) {
+      //   Zog("emitted");
+      // });
 
       function setUpUi() {
         // panel hosts two data tabs: dataTab1, dataTab2 definded below
@@ -280,8 +286,6 @@
           symBut.addTo(stage).pos(50, 50).drag();
           panel.removeFrom();
         });
-
-
 
         // content for panel 1
         var dataTab1 = new Container(panel.width, panel.height).center(panel); // initial adding to panel makes this the default
@@ -448,7 +452,6 @@
           .addTo(dataTab1)
           .pos(250, col1Y + 35);
         // -------------------------------------------------------------------
-
         var buttonLabel = new Label({
           text: "Store",
           size: 16,
@@ -466,6 +469,36 @@
         storeButton.on("click", function(e) {
           saveTolocalStorage();
         });
+        // -------------------------------------------------------------------
+        var buttonLabel2 = new Label({
+          text: "Apply",
+          size: 16,
+          color: black,
+          align: "center"
+        });
+
+        var applyButton = new Button({
+            width: 130,
+            height: 35,
+            label: buttonLabel2
+          }).addTo(dataTab1)
+          .pos(250, col1Y + 35 + 35 + 35 + 17);
+
+        applyButton.on("click", function(e) {
+          var partEmitted = particles.particlesEmitted;
+          var currentParticle = particles.currentParticle;
+
+          theNewEmitterParticle = new Label({
+            text: theNewEmitterParticleText,
+            size: 40,
+            align: "center"
+          });
+
+//          particles.removeFrom(stage);
+//          particles.clearPool();
+          setUpEmitter();
+        });
+        // -------------------------------------------------------------------
 
         // button.on("click", function() {
         //   if (countDownTimer != 0) {
@@ -541,16 +574,17 @@
           tmp.on("click", function(e) {
             //var count_them = particles.particlesEmitted;
             //particles.clearPool();
+            // theNewEmitterParticle.label.text = e.target.text;
+            // theNewEmitterParticleText = theNewEmitterParticle.label.text; // for storage
+            theNewEmitterParticleText = e.target.text;
             theNewEmitterParticle.label.text = e.target.text;
-            theNewEmitterParticleText = theNewEmitterParticle.label.text; // for storage
-
             var p = particles.particles.children; // p is the array of individual Particles
             var numElem = p.length;
 
             //interval(time, call, total, immediate)
-            interval(time=250, call=function(obj) {
-               particles.particles.children[obj.count].children[0].text = theNewEmitterParticleText; // starts counting at 1
-            }, total=numElem,immediate=true); // now will log 1 - number of current particles
+            interval(time = 250, call = function(obj) {
+              particles.particles.children[obj.count].children[0].text = theNewEmitterParticleText; // starts counting at 1
+            }, total = numElem, immediate = true); // now will log 1 - number of current particles
           });
 
           arrayOfLabels.push(tmp);
@@ -613,50 +647,57 @@
       //p[cc].label.text = "♓";
 
       var tickerFunction = Ticker.add(function() {
-        var p = particles.particles.children; // p is the array of individual Particles
-        var numElem = p.length;
-        var index = null; // for return value of hit test
-        var wasHit = false;
-        var cc = 0;
+          var p = particles.particles.children; // p is the array of individual Particles
+          var numElem = p.length;
+          var index = null; // for return value of hit test
+          var wasHit = false;
+          //var cc = 0;
 
-        // circle hit testing  the particles
-        for (cc = 0; cc < numElem; cc++) {
-          wasHit = circle.hitTestBounds(other = p[cc], margin = -10);
-          if (wasHit && !godMode) {
-            index = 0;
-            break;
+          // circle hit testing  the particles
+          for (var cc = 0;
+            (cc < numElem) && (!wasHit); cc++) {
+            //particles.particles.children[cc].children[0].text
+            if (particles.particles.children[cc].visible == true) {
+              wasHit = circle.hitTestBounds(other = p[cc], margin = -10);
+              if (wasHit && !godMode) {
+                index = 0;
+                break;
+              }
+            } else {
+              //zog("not visible");
+            }
           }
-        }
 
-        if (index == 0) {
-          //  circle is hit, stop the countdown
-          countingTime = false;
+          if (index == 0) {
+            //  circle is hit, stop the countdown
+            countingTime = false;
 
-          particles.pauseEmitter(true, freeze = true, immediate = true);
+            particles.pauseEmitter(true, freeze = true, immediate = true);
 
-          //saveTolocalStorage();
+            //saveTolocalStorage();
 
-          // pulse the player token
-          circle.animate({
-            props: {
-              scale: 1.5,
-              rotation: -180
-            },
-            time: 300,
-            ease: "linear",
-            call: Ticker.remove(tickerFunction),
-            loop: 0,
-            rewind: false,
-            from: false
-          });
+            // pulse the player token
+            circle.animate({
+              props: {
+                scale: 1.5,
+                rotation: -180
+              },
+              time: 300,
+              ease: "linear",
+              call: Ticker.remove(tickerFunction),
+              loop: 0,
+              rewind: false,
+              from: false
+            });
 
-          // Check to see if a function is in the Ticker for that stage:
-          zog(Ticker.has(tickerFunction)); // false at the moment until added again
+            // Check to see if a function is in the Ticker for that stage:
+            zog(Ticker.has(tickerFunction)); // false at the moment until added again
 
-        } else {
-          // nothing was hit
-        }
-      }, stage); // end of tickerFunction()
+          } else {
+            // nothing was hit
+          }
+        },
+        stage); // end of tickerFunction()
 
       stage.update()
     }); // end of ready
