@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>ZIM Frame - Fit Template</title>
+
+  <!-- Welcome to ZIM at https://zimjs.com - Code Creativity!                              -->
+  <!-- ZIM runs on the HTML Canvas powered by JavaScript and CreateJS https://createjs.com -->
+  <!-- Founded by Inventor Dan Zen - http://danzen.com - Canadian New Media Award Winner   -->
+  <!-- ZIM is free to use. You can donate to help improve ZIM at https://zimjs.com/donate  -->
+
+  <script src="https://zimjs.org/cdn/1.2.0/createjs_min.js"></script>
+  <script src="https://zimjs.org/cdn/10.5.1/zim.js"></script>
+  <!-- use zimjs.com/distill for minified individual functions! -->
+
+  <script>
+    // SCALING OPTIONS
+    // scaling can have values as follows with full being the default
+    // "fit"	sets canvas and stage to dimensions and scales to fit inside window size
+    // "outside"	sets canvas and stage to dimensions and scales to fit outside window size
+    // "full"	sets stage to window size with no scaling
+    // "tagID"	add canvas to HTML tag of ID - set to dimensions if provided - no scaling
+    var frame = //new Frame(scaling, width, height, color, outerColor);
+      new Frame("fit",
+        window.screen.availWidth,
+        window.screen.availHeight,
+        "#000", "#555");
+
+    frame.on("ready", function() {
+      zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+
+      var stage = frame.stage;
+      var stageW = frame.width;
+      var stageH = frame.height;
+
+      // see https://zimjs.com/learn.html for video and code tutorials
+      // see https://zimjs.com/docs.html for documentation
+      // see https://zimjs.com/bits.html for 64 Interactive Media techniques
+
+      // put your code here (you can delete this sample code)
+      var ball = new Circle(20, lighter).centerReg(stage);
+
+      //obj.wiggle(property, baseAmount , minAmount, maxAmount, minTime, maxTime, totalTime, type, ease, integer, id, startType)
+      ball.wiggle({
+        property: "x",
+        baseAmount: ball.x,
+        minAmount: stageH / 2,
+        maxAmount: stageH / 2,
+        minTime: 1000,
+        maxTime: 2000,
+        totalTime: null,
+        type: "both",
+        ease: "quadInOut",
+        integer: false,
+        id: 1234,
+        startType: "both"
+      }).wiggle({
+        property: "y",
+        baseAmount: ball.y,
+        minAmount: stageH / 2,
+        maxAmount: stageH / 2,
+        minTime: 1000,
+        maxTime: 2000,
+        type: "both",
+        ease: "quadInOut",
+        integer: false,
+        id: 1235,
+        startType: "both"
+      });
+
+      stage.on("stagemousedown", () => {
+        //emitter.pause(!emitter.paused, null, true);
+        //ball.pauseAnimate();
+        ball.pauseAnimate(!ball.paused, id = null) //pauses tweens with this id on the target object
+        // ball.animate({
+        //   props: {
+        //     scale: 1.2
+        //   }, // note we are using from - so we animate from rotation -360 to 0 and scale 0 to 1
+        //   time: 500,
+        //   ease: "elasticInOut",
+        //   wait: null,
+        //   from: false,
+        //   loop:true,
+        //   rewind: false
+        // });
+      });
+
+
+      //.wiggle("y", ball.x, stageH / 2, stageH, 500, 1000)
+      // wiggles the ball 10-30 pixels to the left and right of center taking 300-1000 ms each time
+
+      //ball.pauseAnimate(); // will pause the wiggle
+
+      // with chaining - can also assign to a variable for later access
+      // new Circle(100, pink)
+      //     .center()
+      //     .drag();
+
+      // without chaining
+      // var circle = new Circle(100, pink);
+      // circle.center();
+      // circle.drag();
+
+      stage.update(); // this is needed to show any changes
+
+    }); // end of ready
+  </script>
+
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+
+</head>
+
+<body>
+  <!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+
+</html>

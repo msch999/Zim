@@ -20,7 +20,7 @@
       new Frame("fit",
         window.screen.availWidth,
         window.screen.availHeight,
-        "#000", "#555", assets, path);
+        "#010101", "#555", assets, path);
 
     frame.on("ready", function() {
       var stage = frame.stage;
@@ -113,7 +113,7 @@
 
       var backgroundCircleBelow = new Circle(stageH / 2 + 70, "#111111").centerReg(stage);
       var backgroundCircleTop = new Circle(stageH / 2 - 50, "#333333").centerReg(stage);
-      var theCenter = new Circle(10, orange).centerReg(stage);
+      var theCenter = new Circle(25, orange).centerReg(stage);
 
       var circle; // attracts the particles and is draggable
       var particles; // the Emitter
@@ -146,7 +146,7 @@
             countdownLabel.text = "Time: " + countDownTimer
           } else {
             // timer is now 0; remove emitter
-            particles.particles.removeFrom(stage);
+            //particles.particles.removeFrom(stage);
 
             curLevel++;
             //reset timer
@@ -165,15 +165,17 @@
             stepperPartLife.currentValue = partLife;
             stepperMaxTimeInLevel.currentValue = maxTimeInLevel;
 
-            theNewEmitterParticle = new Label({
-              text: theNewEmitterParticleText,
-              size: 40,
-              align: "center"
-            });
+            theNewEmitterParticle.label.text = theNewEmitterParticleText;
+
+            // theNewEmitterParticle = new Label({
+            //   text: theNewEmitterParticleText,
+            //   size: 40,
+            //   align: "center"
+            // });
 
             //zog(theNewEmitterParticle.label.text);
 
-            setUpEmitter();
+            //setUpEmitter();
           }
         }
       });
@@ -227,23 +229,29 @@
           shrink: false,
           force: partForce,
           gravity: 0,
+          wind:0,
+          decayTime:1000,
+          decayStart:null,
+          trace:false,
           animation: {
             obj: {
               rotation: ["360", "-360"],
-              scale: 0.7
+              //scale: 0.7   // smoother without
             },
             loop: true,
             time: {
-              min: 4000,
-              max: 5000
+              min: 10000, //4000,
+              max: 10000 //5000
             },
             ease: "linear",
             from: false
           },
           sink: circle,
           sinkForce: partSinkForce,
-          cache: true,
-          startPaused: false
+          cache: null,
+          startPaused: false,
+          pool: true,
+          poolMin: 2
         }).centerReg(stage);
       } // end of setUpEmitter
 
@@ -531,10 +539,20 @@
             paddingVertical: 7
           });
           tmp.on("click", function(e) {
-            //zog("clicked over: " +  this.label.text);
+            //var count_them = particles.particlesEmitted;
+            //particles.clearPool();
             theNewEmitterParticle.label.text = e.target.text;
             theNewEmitterParticleText = theNewEmitterParticle.label.text; // for storage
+
+            var p = particles.particles.children; // p is the array of individual Particles
+            var numElem = p.length;
+
+            //interval(time, call, total, immediate)
+            interval(time=250, call=function(obj) {
+               particles.particles.children[obj.count].children[0].text = theNewEmitterParticleText; // starts counting at 1
+            }, total=numElem,immediate=true); // now will log 1 - number of current particles
           });
+
           arrayOfLabels.push(tmp);
         }
 
@@ -591,6 +609,8 @@
       setupPlayerToken();
       setUpEmitter();
       setUpUi();
+      //      particles.clearPool();
+      //p[cc].label.text = "♓";
 
       var tickerFunction = Ticker.add(function() {
         var p = particles.particles.children; // p is the array of individual Particles
