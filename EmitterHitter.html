@@ -137,6 +137,8 @@
         corner: 19
       });
 
+      var changeNewParticle = false;
+
       // counting down from maxTimeInLevel to 0, then inc level
       // repeat after a second = 1000 ms
       var iv = interval(1000, function() {
@@ -156,8 +158,6 @@
             levelLabel.text = "Current Level: " + curLevel.toString().padStart(2, '0');
 
             // display new emitter params on steppers
-            //partNum++;
-
             stepperPartNum.currentVal = partNum;
             stepperPartForce.currentValue = partForce;
             stepperPartSinkForce.currentValue = partSinkForce;
@@ -249,17 +249,13 @@
             sink: circle,
             sinkForce: partSinkForce,
             cache: false,
-            events: false,
+            events: true,
             startPaused: false,
             pool: true,
             poolMin: 1
           })
           .centerReg(stage);
       } // end of setUpEmitter
-
-      // particles.on("emitted", function(e) {
-      //   Zog("emitted");
-      // });
 
       function setUpUi() {
         // panel hosts two data tabs: dataTab1, dataTab2 definded below
@@ -494,9 +490,9 @@
             align: "center"
           });
 
-//          particles.removeFrom(stage);
-//          particles.clearPool();
-          setUpEmitter();
+          //          particles.removeFrom(stage);
+          //          particles.clearPool();
+          //setUpEmitter();
         });
         // -------------------------------------------------------------------
 
@@ -574,12 +570,11 @@
           tmp.on("click", function(e) {
             //var count_them = particles.particlesEmitted;
             //particles.clearPool();
-            // theNewEmitterParticle.label.text = e.target.text;
-            // theNewEmitterParticleText = theNewEmitterParticle.label.text; // for storage
             theNewEmitterParticleText = e.target.text;
             theNewEmitterParticle.label.text = e.target.text;
-            var p = particles.particles.children; // p is the array of individual Particles
-            var numElem = p.length;
+
+            var numElem = particles.particles.children.length;
+            changeNewParticle = true; // tested in on("emitted")
 
             //interval(time, call, total, immediate)
             interval(time = 250, call = function(obj) {
@@ -643,8 +638,15 @@
       setupPlayerToken();
       setUpEmitter();
       setUpUi();
-      //      particles.clearPool();
-      //p[cc].label.text = "♓";
+
+      particles.on("emitted", function(e) {
+        if (changeNewParticle) {
+          if (theNewEmitterParticleText != e.particle.label.text) {
+            e.particle.label.text = theNewEmitterParticleText;
+          }
+
+        }
+      });
 
       var tickerFunction = Ticker.add(function() {
           var p = particles.particles.children; // p is the array of individual Particles
