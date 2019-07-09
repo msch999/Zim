@@ -165,16 +165,6 @@
             stepperPartLife.currentValue = partLife;
             stepperMaxTimeInLevel.currentValue = maxTimeInLevel;
 
-            //theNewEmitterParticle.label.text = theNewEmitterParticleText;
-
-            // theNewEmitterParticle = new Label({
-            //   text: theNewEmitterParticleText,
-            //   size: 40,
-            //   align: "center"
-            // });
-
-            //zog(theNewEmitterParticle.label.text);
-
             //setUpEmitter();
           }
         }
@@ -484,15 +474,8 @@
           var partEmitted = particles.particlesEmitted;
           var currentParticle = particles.currentParticle;
 
-          theNewEmitterParticle = new Label({
-            text: theNewEmitterParticleText,
-            size: 40,
-            align: "center"
-          });
-
-          //          particles.removeFrom(stage);
-          //          particles.clearPool();
-          //setUpEmitter();
+          particles.particles.removeFrom(stage);
+          setUpEmitter();
         });
         // -------------------------------------------------------------------
 
