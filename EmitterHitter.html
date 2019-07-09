@@ -47,7 +47,8 @@
           maxTimeInLevel: 4,
           curLevel: 0,
           godMode: false,
-          theNewEmitterParticleText: "⭐"
+          theNewEmitterParticleText: "⭐",
+          labelChange: false
         };
       }
 
@@ -77,6 +78,7 @@
         //data.curLevel = 0;
         data.godMode = godMode;
         data.theNewEmitterParticleText = theNewEmitterParticleText;
+        data.labelChange = labelChange;
         localStorage.game = JSON.stringify(data);
       }
 
@@ -100,6 +102,7 @@
       var godMode = data.godMode;
       var curLevel = 0; //init level not read in
       var theNewEmitterParticleText = data.theNewEmitterParticleText;
+      var labelChange = data.labelChange;
       var panelSymbolized = uiData.panelSymbolized;
 
       var levelLabel; //msg label in panel
@@ -121,11 +124,7 @@
       var countDownTimer = maxTimeInLevel;
       var countingTime = true;
       //
-      var theNewEmitterParticle = new Label({
-        text: theNewEmitterParticleText,
-        size: 40,
-        align: "center"
-      });
+      var theNewEmitterParticle;
 
       // symbol button when panel is minimzed
       var symBut = new Label({
@@ -138,6 +137,7 @@
       });
 
       var changeNewParticle = false;
+      var utf8Arr = null;
 
       // counting down from maxTimeInLevel to 0, then inc level
       // repeat after a second = 1000 ms
@@ -164,12 +164,14 @@
             stepperPartInterval.currentValue = partInterval;
             stepperPartLife.currentValue = partLife;
             stepperMaxTimeInLevel.currentValue = maxTimeInLevel;
+            if (labelChange == true) {
+              changeParticleLabel(utf8Arr[rand(utf8Arr.length-1)]);
+            }
 
             //setUpEmitter();
           }
         }
       });
-
 
       function setupPlayerToken() {
         // random x y
@@ -196,10 +198,14 @@
       } // end of setupPlayerToken
 
       function setUpEmitter() {
+
+        theNewEmitterParticle = new Label({
+          text: theNewEmitterParticleText,
+          size: 40,
+          align: "center"
+        });
+
         particles = new zim.Emitter({
-            // obj: [new Circle(20, null, [darker, lighter], 2),
-            //   new Rectangle(30, 30, null, [darker, lighter], 2),
-            ////   new Triangle(40, 40, 40, null, [darker, lighter], 2)
             obj: theNewEmitterParticle,
             interval: partInterval,
             num: partNum,
@@ -419,6 +425,22 @@
         });
 
         // -------------------------------------------------------------------
+        var checkBox2 = new CheckBox({
+            label: "label change",
+            size: 90,
+            startChecked: labelChange
+          })
+          .sca(.25)
+          .addTo(dataTab1).pos(col1X + 140, col1Y + 35 + 35 + 35 + 35 + 35 + 35);
+        checkBox2.on("change", function() {
+          if (checkBox2.checked) {
+            labelChange = true;
+          } else {
+            labelChange = false;
+          }
+        });
+
+        // -------------------------------------------------------------------
         levelLabel = new Label({
             //            text: "Current Level: " + curLevel.toString().padStart(2, '0'),
             text: "Current Level: " + curLevel,
@@ -521,22 +543,25 @@
         var dataTab2 = new Container(panel.width, panel.height); //.center(panel); // initial adding to panel makes this the default
         win.center(dataTab2);
 
-        var utf8Arr = [
-          "\u{1F4A9}", "😲", "⭐", "\u{1F600}", "♻️", "⌚", "⌛",
-          "♾️", "⌛", "Ⓜ️", "⚪", "⚫", "⛏️", "⛑️",
-          "✨", "❓", "〽️", "🍾", "🥐", "🥞", "🦄",
-          "🧀", "🧦", "⛔", "⛵", "🏆", "👀", "🕋",
-          "🕎", "💃", "🏄", "🚴", "🛀", "👯", "👣",
-          "👨", "🛶", "🌳", "🤩", "😍", "😵", "👻",
-          "💋", "💣", "🛒", "🛸", "🤺", "⛳", "🌠",
-          "🌀", "🉐", "🎠", "🖕", "🛅", "⭕", "🏰",
-          "😘", "🚀", "🛠️", "🛬", "⚽", "🀄", "⬇️",
-          "❄️", "🧝", "🤾", "👼", "🦅", "🥫", "🤯",
-          "🗣️", "⛢", "🗑️", "🗻", "🗿", "🐾", "🐀"
+        utf8Arr = [
+          "#️", "(⃣", "*️", "0️", "9️", "©️", "®️", "‍‼️", "⁉️", "™️", "ℹ️", "↔️", "↙️", "↩️", "↪️", "⌚", "⌛", "⌨️", "⎈", "⏏️", "⏩", "⏬", "⏰", "⏳", "⏸️", "⏺️", "Ⓜ️", "▪️", "▫️", "▶️", "◀️", "◻️", "◽", "◾", "☀️", "☄️", "★", "☇", "☎️", "☑️", "☒",
+          "☔", "☕", "☖", "☗", "☘️", "☙", "☚", "☝️", "☠️", "☢️", "☣️", "☦️", "☪️", "☮️", "☯️", "☸️", "☺️", "♀️", "♂️", "♈", "♓", "♟️", "♠️", "♣️", "♥️", "♦️", "♨️", "♯", "♰", "♱", "♲", "♻️", "♽", "♾️", "♿", "⚀", "⚅", "⚐", "⚑", "⚒️", "⚓", "⚗️",
+          "⚙️", "⚛️", "⚜️", "⚝", "⚞", "⚟", "⚠️", "⚡", "⚢", "⚪", "⚫", "⚰️", "⚱️", "⚲", "⚳", "⚼", "⚽", "⚾", "⚿", "⛀", "⛃", "⛄", "⛅", "⛈️", "⛍", "⛎", "⛏️", "⛑️", "⛓️", "⛔", "⛡", "⛢", "⛣", "⛤", "⛧", "⛨", "⛩️", "⛪", "⛰️", "⛲", "⛳", "⛵", "⛷️", "⛹️",
+          "⛺", "⛽", "⛿", "✀", "✁", "✂️", "✄", "✅", "✈️", "✉️", "✊", "✋", "✌️", "✍️", "✏️", "✒️", "✔️", "✖️", "✝️", "✡️", "✨", "✳️", "✴️", "❄️", "❇️", "❌", "❎", "❓", "❕", "❗", "❣️", "❤️", "❧", "➕", "➗", "➡️", "➰", "➿", "⤴️", "⤵️", "⬅️", "⬇️",
+          "⬛", "⬜", "⭐", "⭕", "〰️", "〽️", "㊗️", "㊙️", "🀀", "🀄", "🀫", "🀰", "🂓", "🂠", "🂮", "🂯", "🂰", "🂱", "🂾", "🂿", "🃀", "🃁", "🃏", "🃐", "🃑", "🃟", "🃠", "🃵", "🅰️", "🅾️", "🅿️", "🆎", "🆑", "🆚",
+          "🇿", "🈁", "🈂", "🈚", "🈯", "🈲", "🈶", "🈸", "🈺", "🉐", "🉑", "🌀", "🌠", "🌡️", "🌤️", "🌭", "🌯", "🌰", "🌵", "🌶️", "🌷", "🍼", "🍽️", "🍾", "🍿", "🎀", "🎅", "🎓", "🎔", "🎖️", "🎙️", "🎞️", "🎟", "🎠", "🏂", "🏄", "🏅", "🏆",
+          "🏇", "🏊", "🏋️", "🏏", "🏓", "🏔️", "🏠", "🏰", "🏱", "🏳️", "🏴", "🏷", "🏷️", "🏸", "🏺", "🏻", "🏿", "🐀", "🐾", "🐿️", "👀", "👁️", "👂", "👃", "👆", "👐", "👦", "👸", "👼", "💁", "💃", "💅", "💇", "💏", "💑", "💪", "📷", "📸",
+          "📹", "📼", "📽️", "📿", "🔀", "🔽", "🕆", "🕉️", "🕊", "🕋", "🕎", "🕐", "🕧", "🕨", "🕯️", "🕳️", "🕴️", "🕹", "🕺", "🕻", "🖇️", "🖊️", "🖐️", "🖕", "🖖", "🖣", "🖤", "🖥️", "🖨️", "🖱️", "🖼️", "🗂️", "🗑️", "🗜️", "🗡️", "🗣️",
+          "🗨️", "🗯️", "🗳️", "🗺️", "🗻", "🗿", "😀", "😁", "😐", "😑", "😒", "😔", "😕", "😖", "😗", "😘", "😙", "😚", "😛", "😜", "😞", "😟", "😠", "😥", "😦", "😧", "😨", "😫", "😬", "😭", "😮", "😯", "😰", "😳", "😴", "😵", "🙀", "🙁",
+          "🙂", "🙃", "🙄", "🙅", "🙇", "🙋", "🙏", "🚀", "🚣", "🚴", "🚶", "🛀", "🛅", "🛆", "🛋️", "🛌", "🛏", "🛐", "🛑", "🛒", "🛠️", "🛩️", "🛫", "🛬", "🛰️", "🛳️", "🛴", "🛶", "🛷", "🛸", "🛹", "🤐", "🤘", "🤙", "🤞", "🤟", "🤠", "🤦",
+          "🤧", "🤨", "🤯", "🤰", "🤱", "🤲", "🤳", "🤹", "🤺", "🤼", "🤾", "🥀", "🥅", "🥇", "🥋", "🥌", "🥍", "🥏", "🥐", "🥞", "🥟", "🥫", "🥬", "🥰", "🥳", "🥶", "🥺", "🥼", "🥿", "🦀", "🦄", "🦅", "🦑", "🦒", "🦗", "🦘", "🦢", "🦵", "🦶",
+          "🦸", "🦹", "🧀", "🧁", "🧂", "🧐", "🧑", "🧝", "🧦", "🧧", "🧿"
         ];
 
+        var tmpLen = utf8Arr.length;
+
         var tColNum = 7;
-        var tRowNum = 11;
+        var tRowNum = 63;
         var arrayOfLabels = [];
         var pSize = 26;
 
@@ -551,18 +576,7 @@
             paddingVertical: 7
           });
           tmp.on("click", function(e) {
-            //var count_them = particles.particlesEmitted;
-            //particles.clearPool();
-            theNewEmitterParticleText = e.target.text;
-            theNewEmitterParticle.label.text = e.target.text;
-
-            var numElem = particles.particles.children.length;
-            changeNewParticle = true; // tested in on("emitted")
-
-            //interval(time, call, total, immediate)
-            interval(time = 250, call = function(obj) {
-              particles.particles.children[obj.count].children[0].text = theNewEmitterParticleText; // starts counting at 1
-            }, total = numElem, immediate = true); // now will log 1 - number of current particles
+            changeParticleLabel(e.target.text);
           });
 
           arrayOfLabels.push(tmp);
@@ -615,8 +629,21 @@
           panel.addTo(stage).pos(50, 50);
           symBut.removeFrom();
         }
-
       } // end of setUpUi()
+
+      function changeParticleLabel(newText) {
+        theNewEmitterParticleText = newText;
+        theNewEmitterParticle.label.text = newText;
+
+        var numElem = particles.particles.children.length;
+        changeNewParticle = true; // tested in on("emitted")
+
+        //interval(time, call, total, immediate)
+        interval(time = 250, call = function(obj) {
+          particles.particles.children[obj.count].children[0].text = theNewEmitterParticleText; // starts counting at 1
+        }, total = numElem, immediate = true); // now will log 1 - number of current particles
+
+      }
 
       setupPlayerToken();
       setUpEmitter();
