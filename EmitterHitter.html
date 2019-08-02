@@ -43,8 +43,9 @@
           partSinkForce: 0.0,
           partInterval: 150,
           partLife: 4000,
+          //          rotation:
           // level parameters
-          maxTimeInLevel: 4,
+          levelDuration: 4,
           curLevel: 0,
           godMode: false,
           theNewEmitterParticleText: "⭐",
@@ -74,7 +75,7 @@
         data.partInterval = partInterval;
         data.partLife = partLife;
         // level parameters
-        data.maxTimeInLevel = maxTimeInLevel;
+        data.levelDuration = levelDuration;
         //data.curLevel = 0;
         data.godMode = godMode;
         data.theNewEmitterParticleText = theNewEmitterParticleText;
@@ -98,7 +99,7 @@
       var partInterval = data.partInterval;
       var partLife = data.partLife;
       // level parameters
-      var maxTimeInLevel = data.maxTimeInLevel;
+      var levelDuration = data.levelDuration;
       var godMode = data.godMode;
       var curLevel = 0; //init level not read in
       var theNewEmitterParticleText = data.theNewEmitterParticleText;
@@ -121,7 +122,7 @@
       var circle; // attracts the particles and is draggable
       var particles; // the Emitter
 
-      var countDownTimer = maxTimeInLevel;
+      var countDownTimer = levelDuration;
       var countingTime = true;
       //
       var theNewEmitterParticle;
@@ -139,7 +140,7 @@
       var changeNewParticle = false;
       var utf8Arr = null;
 
-      // counting down from maxTimeInLevel to 0, then inc level
+      // counting down from levelDuration to 0, then inc level
       // repeat after a second = 1000 ms
       var iv = interval(1000, function() {
         if (countingTime == true) {
@@ -152,7 +153,7 @@
 
             curLevel++;
             //reset timer
-            countDownTimer = maxTimeInLevel;
+            countDownTimer = levelDuration;
 
             countdownLabel.text = "Time: " + countDownTimer
             levelLabel.text = "Current Level: " + curLevel.toString().padStart(2, '0');
@@ -163,9 +164,9 @@
             stepperPartSinkForce.currentValue = partSinkForce;
             stepperPartInterval.currentValue = partInterval;
             stepperPartLife.currentValue = partLife;
-            stepperMaxTimeInLevel.currentValue = maxTimeInLevel;
+            stepperMaxTimeInLevel.currentValue = levelDuration;
             if (labelChange == true) {
-              changeParticleLabel(utf8Arr[rand(utf8Arr.length-1)]);
+              changeParticleLabel(utf8Arr[rand(utf8Arr.length - 1)]);
             }
 
             //setUpEmitter();
@@ -194,8 +195,10 @@
             time: 2000,
             from: true
           })
+          //          .transform()
           .drag();
       } // end of setupPlayerToken
+
 
       function setUpEmitter() {
 
@@ -220,7 +223,7 @@
             wind: 0,
             animation: {
               obj: {
-                rotation: ["360", "-360"],
+                rotation: ["180", "-180", "360", "-360", "720", "-720"],
                 //scale: 0.7   // smoother without
               },
               loop: true,
@@ -232,7 +235,8 @@
               from: false
             },
             random: {
-              color: ["#adff00", "#74d600", "#028900", "#00d27f", "#00ff83"], // https://www.color-hex.com/color-palette/1325
+              //color: ["#adff00", "#74d600", "#028900", "#00d27f", "#00ff83"], // https://www.color-hex.com/color-palette/1325
+              color: ["#0900FF", "#00FFA5", "#FF00C0", "#30FF00", "#FFD500", "#FF0012", "#FF6000", "#8300FF"],
               rotation: {
                 min: -360,
                 max: 360
@@ -252,6 +256,20 @@
           })
           .centerReg(stage);
       } // end of setUpEmitter
+
+      function alea(mini, maxi, integ) {
+        // input : mini and maxi are numbers, with maxi > mini (not checked)
+        // return a random number between mini (included) and maxi (excluded)
+        // if 'integ' missing or == false :
+        //   returns a float
+        // si 'integ' == true
+        //   mini and maxi must be integers
+        //   return integer value
+        let x = mini + mrandom() * (maxi - mini);
+        if (integ) return mfloor(x);
+        return x;
+      }
+
 
       function setUpUi() {
         // panel hosts two data tabs: dataTab1, dataTab2 definded below
@@ -388,7 +406,7 @@
           align: "left"
         }).addTo(dataTab1).pos(col1X + 110, col1Y + 35 + 35 + 35 + 35 + 3);
         // -------------------------------------------------------------------
-        // var maxTimeInLevel = 15;
+        // var levelDuration = 15;
         stepperMaxTimeInLevel = new Stepper({
             continuous: false,
             stepperType: "number",
@@ -397,13 +415,13 @@
             step: 1
           })
           .pos(col1X, col1Y + 35 + 35 + 35 + 35 + 35, false, false, dataTab1).sca(.25);
-        stepperMaxTimeInLevel.currentValue = maxTimeInLevel;
+        stepperMaxTimeInLevel.currentValue = levelDuration;
         stepperMaxTimeInLevel.on("change", function() {
-          maxTimeInLevel = stepperMaxTimeInLevel.currentValue;
+          levelDuration = stepperMaxTimeInLevel.currentValue;
           stage.update();
         });
         new Label({
-          text: "max Time in Level",
+          text: "level duration",
           size: 17,
           color: black,
           align: "left"
@@ -599,7 +617,7 @@
           colSize: 43 // ignored if width set
         });
 
-        win.add(tile.remake());
+        win.add(tile);
 
 
         // event to change content as panels change
@@ -631,18 +649,28 @@
         }
       } // end of setUpUi()
 
+
+      var isAnimating = false;
+
       function changeParticleLabel(newText) {
+        //        if (!isAnimating) {
         theNewEmitterParticleText = newText;
         theNewEmitterParticle.label.text = newText;
 
         var numElem = particles.particles.children.length;
         changeNewParticle = true; // tested in on("emitted")
 
+        // for (var i = 0; i < numElem; i++) {
+        //   particles.particles.children[i].children[0].text = theNewEmitterParticleText;
+        // }
+
         //interval(time, call, total, immediate)
         interval(time = 250, call = function(obj) {
+          isAnimating = true;
           particles.particles.children[obj.count].children[0].text = theNewEmitterParticleText; // starts counting at 1
         }, total = numElem, immediate = true); // now will log 1 - number of current particles
-
+        //      }
+        //        isAnimating = false;
       }
 
       setupPlayerToken();
@@ -663,7 +691,6 @@
           var numElem = p.length;
           var index = null; // for return value of hit test
           var wasHit = false;
-          //var cc = 0;
 
           // circle hit testing  the particles
           for (var cc = 0;
@@ -683,7 +710,6 @@
           if (index == 0) {
             //  circle is hit, stop the countdown
             countingTime = false;
-
             particles.pauseEmitter(true, freeze = true, immediate = true);
 
             //saveTolocalStorage();
